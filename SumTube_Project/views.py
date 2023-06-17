@@ -163,7 +163,7 @@ def add_transcript(request):
                 # 'gptRec3': vid.gptRec3,
             }
             # Pass the context to the template
-            return render(request, 'add_transcript.html', context)
+            return render(request, 'results.html', context)
         else:
             # URL does not exist
             transcript = 'null'
@@ -285,9 +285,9 @@ def add_transcript(request):
                     'gptRec2': vid.gptRec2,
                     # 'gptRec3': vid.gptRec3,
                 }
-                return render(request, 'add_transcript.html', context)
+                return render(request, 'results.html', context)
             else:
-                return render(request, 'add_transcript.html')
+                return render(request, 'results.html')
     else:
         # HTML Request was not 'POST'
         # return render(request, 'add_transcript.html')
