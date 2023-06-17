@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>SumTube Results</title>
+		{% load static %}
+		<style>
+			@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap");
+
+			body {
+				font-family: "Roboto", Arial, sans-serif;
+			}
+
+			h1 {
+				color: #2d3748;
+				font-size: 30px;
+			}
+			h3 {
+				color: #3182ce;
+				font-size: 20px;
+			}
+			h1 a {
+				color: #3182ce;
+				text-decoration: none;
+			}
+			h1 a:hover {
+				color: #d74f4b;
+			}
+			h1 a:hover u {
+				color: #d74f4b;
+			}
+			hr {
+				border: 0;
+				height: 2px;
+				background: #2d3748;
+				margin-bottom: 2em;
+			}
+			p {
+				line-height: 1.4;
+				color: black;
+				font-size: 18px;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>
+			<a style="color: #2d3748">Results for: </a>
+			<a href="{{ inputUrl }}"><u>{{ vidTitle }}</u></a>
+		</h1>
+		<a href="http://13.59.219.134/transcripts/"
+			><img
+				src="{% static 'transcripts/assets/images/sumtube.png' %}"
+				alt="home"
+			/>
+		</a>
+		<hr />
+		<script>
+			var ytID = "{{ ytId }}";
+			var src = "https://www.youtube.com/embed/" + ytID;
+
+			var iframeTag = document.createElement("iframe");
+			iframeTag.width = "560";
+			iframeTag.height = "315";
+			iframeTag.src = src;
+			iframeTag.title = "YouTube video player";
+			iframeTag.frameborder = "0";
+			iframeTag.allow =
+				"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+			iframeTag.allowfullscreen = true;
+
+			document.body.appendChild(iframeTag);
+		</script>
+
+		<h3>Summary ({{ lang }}):</h3>
+		<p>{{ gptSummary }}</p>
+		<h3>Transcript:</h3>
+		<p>"{{ transcript }}.."</p>
+		<h3>Suggestions:</h3>
+		<ul>
+			<li>{{ gptRec1 }}</li>
+			<li>{{ gptRec2 }}</li>
+		</ul>
+		<hr />
+		<h3 style="color: #d74f4b">YouTube ID:</h3>
+		<p>{{ ytId }}</p>
+		<h3 style="color: #d74f4b">Upload Date:</h3>
+		<p>{{ date }}</p>
+		<h3 style="color: #d74f4b">YouTube Description:</h3>
+		<p>{{ description }}</p>
+		<hr />
+		<h3 style="color: black">Raw JSON Response:</h3>
+		<p>{{ gptRaw }}</p>
+	</body>
+</html>

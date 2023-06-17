@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>SumTube Results</title>
+		{% load static %}
+		<style>
+			body {
+				font-family: "Roboto", Arial, sans-serif;
+			}
+
+			h1 {
+				color: #2d3748;
+				font-size: 30px;
+			}
+
+			h3 {
+				color: #3182ce;
+				font-size: 20px;
+			}
+
+			h1 a {
+				color: #3182ce;
+				text-decoration: none;
+			}
+
+			h1 a:hover {
+				color: #d74f4b;
+			}
+
+			h1 a:hover u {
+				color: #d74f4b;
+			}
+
+			hr {
+				border: 0;
+				height: 2px;
+				background: #2d3748;
+				margin-bottom: 2em;
+			}
+
+			p {
+				line-height: 1.4;
+				color: black;
+				font-size: 18px;
+			}
+
+			.search-bar {
+				background-color: #f2f2f2;
+				padding: 20px;
+				border-radius: 5px;
+				text-align: center;
+			}
+
+			.search-input {
+				padding: 10px;
+				border: 1px solid #ddd;
+				border-radius: 5px;
+				width: 100%;
+				margin-bottom: 10px;
+			}
+
+			.form-select {
+				padding: 10px;
+				border: 1px solid #ddd;
+				border-radius: 5px;
+				width: 100%;
+				margin-bottom: 10px;
+				background-color: #fff;
+				appearance: none;
+				-moz-appearance: none;
+				-webkit-appearance: none;
+			}
+
+			.submit-button {
+				padding: 10px 20px;
+				background-color: #3182ce;
+				color: #fff;
+				border: none;
+				border-radius: 5px;
+				cursor: pointer;
+				font-weight: bold;
+				transition: background-color 0.3s ease;
+			}
+
+			.submit-button:hover {
+				background-color: #2c6ac1;
+			}
+
+			.submit-button[disabled] {
+				background-color: #d74f4b;
+			}
+
+			.submit-button.valid {
+				background-color: #4caf50;
+			}
+
+			.validation-message {
+				font-size: 14px;
+				color: #dc3545;
+				margin-top: 5px;
+			}
+		</style>
+	</head>
+	<body>
+		<a href="http://127.0.0.1:8000/SumTube_Project/">
+			<img
+				src="{% static 'SumTube_Project/assets/images/sumtube.png' %}"
+				alt="home"
+			/>
+		</a>
+		<hr />
+
+		<div class="search-bar">
+			<form
+				class="search-form"
+				id="search-form"
+				name="gs"
+				method="POST"
+				role="search"
+				action="/transcripts/add_transcript/"
+			>
+				{% csrf_token %}
+				<input
+					type="address"
+					name="address"
+					class="search-input"
+					placeholder="Enter a URL"
+					autocomplete="on"
+					required
+					id="youtube-url-input"
+					oninput="checkInputValidity()"
+				/>
+				<div
+					class="validation-message"
+					id="validation-message"
+				></div>
+				<select
+					name="language"
+					class="form-select"
+					aria-label="Default select example"
+					id="chooseCategory"
+					onchange="this.form.click()"
+				>
+					<option
+						value="en"
+						selected
+					>
+						English
+					</option>
+					<option value="es">Español</option>
+					<option value="fr">Français</option>
+					<option value="de">Deutsch</option>
+					<option value="pt">Português</option>
+					<option value="it">Italiano</option>
+				</select>
+				<button
+					class="submit-button"
+					id="submit-button"
+					disabled
+				>
+					<i class="fa fa-search"></i> Summarize
+				</button>
+			</form>
+		</div>
+
+		<script>
+			// Check if a Youtube ID is Valid
+			function validVideoId(id) {
+				var videoUrl = "https://www.youtube.com/watch?v=" + id;
+				var iframe = document.createElement("iframe");
+				iframe.src = videoUrl;
+
+				iframe.onload = function () {
+					if (iframe.contentDocument.querySelector("video")) {
+						console.log("Valid video ID");
+					} else {
+						console.log("Invalid video ID");
+					}
+				};
+
+				document.body.appendChild(iframe);
+			}
+			// Regex the Youtube ID from a URL
+			function extractVideoId(url) {
+				// Regular expression pattern to match YouTube video IDs
+				var pattern =
+					/(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]+)/;
+				// Find the video ID using the pattern
+				var match = pattern.exec(url);
+				if (match) {
+					var videoId = match[1];
+					return videoId;
+				} else {
+					return null;
+				}
+			}
+			// Function to check input validity and enable/disable the submit button
+			function checkInputValidity() {
+				const dotComRegex =
+					/^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|v\/|playlist\?list=))([\w-]{11})(?:\S+)?$/;
+				const dotBeRegex = /^(?:https?:\/\/)?youtu\.be\/([\w-]{11})(?:\S+)?$/;
+				var urlInput = document.getElementById("youtube-url-input").value;
+				var urlIsValid =
+					dotComRegex.test(urlInput) || dotBeRegex.test(urlInput);
+				var ytId = extractVideoId(urlInput);
+
+				var validationMessage = document.getElementById("validation-message");
+				var submitButton = document.getElementById("submit-button");
+
+				submitButton.style.backgroundColor = "#d74f4b"; // Red (default)
+
+				if (urlIsValid && ytId !== null) {
+					if (ytId.length === 11) {
+						// URL and ID are valid
+						validationMessage.textContent = "";
+						submitButton.disabled = false;
+						submitButton.classList.remove("invalid-url");
+						submitButton.style.backgroundColor = "#4CAF50"; // Green
+					} else {
+						// ID is invalid
+						validationMessage.textContent =
+							"Youtube ID is invalid (too long/short)";
+						submitButton.disabled = true;
+						submitButton.classList.add("invalid-url");
+					}
+				} else {
+					// URL format is invalid
+					validationMessage.textContent = "Invalid Youtube URL Format";
+					submitButton.disabled = true;
+					submitButton.classList.add("invalid-url");
+				}
+			}
+		</script>
+	</body>
+</html>
