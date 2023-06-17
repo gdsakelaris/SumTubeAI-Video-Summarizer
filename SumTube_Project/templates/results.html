@@ -53,6 +53,15 @@
 			/>
 		</a>
 		<hr />
+		<h2 style="color: #3182ce">SumTube Summary:</h2>
+		<h4 style="color: gray">SumTube-Generated Transcript:</h4>
+		<p>"{{ transcript }}"</p>
+		<p>{{ gptSummary }}</p>
+		<h2 style="color: #3182ce">Recommended Channels:</h2>
+		<ul>
+			<li>{{ gptRec1 }}</li>
+			<li>{{ gptRec2 }}</li>
+		</ul>
 		<script>
 			var ytID = "{{ ytId }}";
 			var src = "https://www.youtube.com/embed/" + ytID;
@@ -79,21 +88,13 @@
 		<p>{{ description }}</p>
 		<h3 style="color: #d74f4b">Upload Date:</h3>
 		<p>{{ date }}</p>
-		<hr />
-		<h2 style="color: #3182ce">SumTube Summary:</h2>
-		<p>{{ gptSummary }}</p>
-		<h2 style="color: #3182ce">Recommended Channels:</h2>
-		<ul>
-			<li>{{ gptRec1 }}</li>
-			<li>{{ gptRec2 }}</li>
-		</ul>
-		<hr />
 		{% comment %}
 		<h2 style="color: #d74f4b; text-decoration: underline">YouTube Data</h2>
-		{% endcomment %}
+		{% endcomment %} {% comment %}
 		<h4 style="color: black">SumTube-Generated Transcript:</h4>
 		<p>"{{ transcript }}"</p>
 		<h4 style="color: black">Raw JSON Response:</h4>
 		<p>{{ gptRaw }}</p>
+		{% endcomment %}
 	</body>
 </html>
