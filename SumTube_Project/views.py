@@ -1,8 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-
 from .models import Video, Ticket
-
 import pycountry
 import tempfile
 import openai
@@ -14,23 +12,24 @@ import re
 from datetime import datetime
 import speech_recognition as sr
 from json import JSONDecodeError
+###
+openai.api_key_path = "/home/ubuntu/gptKey.txt"
+# openai.api_key_path = "/gptKey.txt"
 
-# ##
-# openai.api_key_path = "/home/ubuntu/gptKey.txt"
-# openai.api_key_path = "../Daniel_misc/TEMP_K.txt"
+###
 # tempStem = 'c:\sc\out'  # '/home/ubuntu/sc/out'#'c:\sc\out'
 # tempWebm = 'c:\sc\out.webm'  # '/home/ubuntu/sc/out.webm'#'c:\sc\out.webm'#
 # tempFlac = 'c:\sc\out.flac'  # '/home/ubuntu/sc/out.flac'#'c:\sc\out.flac'#
-# ##
+###
 # Hardcoded transcribe_audio() for testing purposes
 # def transcribe_audio(audio_file):
 #     # For testing, hardcoded audio_file
 #     audio_file = "/path/to/your/test_audio_file.flac"
 # Step 2: Transcribe FLAC to TXT
-# ##
+###
+
 
 # Functions
-
 
 def transcribe_audio(audio_file):
     recognizer = sr.Recognizer()
@@ -293,32 +292,6 @@ def add_transcript(request):
         # HTML Request was not 'POST'
         # return render(request, 'add_transcript.html')
         return render(request, 'results.html')
-
-
-@login_required
-def post_ticket(request):
-    print("in get_contact")
-    if request.method == 'POST':
-        try:
-            name = request.POST.get('name')
-            surname = request.POST.get('surname')
-            email = request.POST.get('email')
-            message = request.POST.get('message')
-
-            # Create the support ticket in the DB
-            Ticket.objects.create(
-                name=name,
-                surname=surname,
-                email=email,
-                message=message
-            )
-
-            # Render a response
-            return render(request, 'contact_response.html', {'name': name, 'surname': surname, 'email': email, 'message': message})
-        except Exception as ex:
-            return render(request, 'contact_response.html', {'name': f'error occured: {str(ex)}', 'surname': f'null', 'email': f'null', 'message': 'null'})
-    else:
-        return render(request, 'contact_response.html', {'name': 'error occured', 'surname': 'error occured', 'email': 'error occured', 'message': 'error occured'})
 
 
 @login_required
