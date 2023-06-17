@@ -20,7 +20,8 @@ from django.urls import path, include
 # from django.conf.urls import include  # error was being thrown w/o include
 
 urlpatterns = [
-    path("SumTube_Project/", include('SumTube_Project.urls')),
-    path('accounts/', include('django.contrib.auth.urls')),
+    # path("SumTube_Project/", include('SumTube_Project.urls')),
+    # path('accounts/', include('django.contrib.auth.urls')),
     path('admin/', admin.site.urls),
+    path('', include('SumTube_Project.urls')),
 ]
