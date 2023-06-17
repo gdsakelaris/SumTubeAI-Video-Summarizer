@@ -70,23 +70,27 @@
 			document.body.appendChild(iframeTag);
 		</script>
 
+		{% comment %}
 		<h3>Summary ({{ lang }}):</h3>
+		{% endcomment %}
+		<h3>SumTube Summary:</h3>
 		<p>{{ gptSummary }}</p>
-		<h3>Transcript:</h3>
-		<p>"{{ transcript }}.."</p>
-		<h3>Suggestions:</h3>
+		<h3>Recommended Channels:</h3>
 		<ul>
 			<li>{{ gptRec1 }}</li>
 			<li>{{ gptRec2 }}</li>
 		</ul>
 		<hr />
-		<h3 style="color: #d74f4b">YouTube ID:</h3>
+		<h2 style="color: #d74f4b; text-decoration: underline">YouTube Data</h2>
+		<h3 style="color: #d74f4b">Video ID:</h3>
 		<p>{{ ytId }}</p>
+		<h3 style="color: #d74f4b">Description:</h3>
+		<p>{{ description }}</p>
 		<h3 style="color: #d74f4b">Upload Date:</h3>
 		<p>{{ date }}</p>
-		<h3 style="color: #d74f4b">YouTube Description:</h3>
-		<p>{{ description }}</p>
 		<hr />
+		<h3 style="color: black">SumTube-Generated Transcript:</h3>
+		<p>"{{ transcript }}"</p>
 		<h3 style="color: black">Raw JSON Response:</h3>
 		<p>{{ gptRaw }}</p>
 	</body>
