@@ -81,7 +81,7 @@
 		<h3 style="color: #d74f4b">Upload Date:</h3>
 		<p>{{ date }}</p>
 		<hr />
-		<h2>SumTube Summary:</h2>
+		<h2 style="color: #3182ce">SumTube Summary:</h2>
 		<p>{{ gptSummary }}</p>
 		<h3>Recommended Channels:</h3>
 		<ul>
@@ -92,10 +92,9 @@
 		{% comment %}
 		<h2 style="color: #d74f4b; text-decoration: underline">YouTube Data</h2>
 		{% endcomment %}
-		<hr />
-		<h3 style="color: black">SumTube-Generated Transcript:</h3>
+		<h4 style="color: black">SumTube-Generated Transcript:</h4>
 		<p>"{{ transcript }}"</p>
-		<h3 style="color: black">Raw JSON Response:</h3>
+		<h4 style="color: black">Raw JSON Response:</h4>
 		<p>{{ gptRaw }}</p>
 	</body>
 </html>
