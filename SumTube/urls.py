@@ -17,11 +17,12 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
-# from django.conf.urls import include  # error was being thrown w/o include
+from django.conf.urls import include  # error was being thrown w/o include
 
 urlpatterns = [
     # path("SumTube_Project/", include('SumTube_Project.urls')),
     # path('accounts/', include('django.contrib.auth.urls')),
+    path('accounts/', include('django.contrib.auth.urls')),
+    path('sumtube/', include('SumTube_Project.urls')),
     path('admin/', admin.site.urls),
-    path('', include('SumTube_Project.urls')),
 ]
