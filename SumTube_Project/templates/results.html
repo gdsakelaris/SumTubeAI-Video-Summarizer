@@ -43,8 +43,9 @@
 	</head>
 	<body>
 		<h1>
-			<a style="color: #2d3748">Results for: </a>
+			<a style="color: #2d3748">Results for: "</a>
 			<a href="{{ inputUrl }}"><u>{{ vidTitle }}</u></a>
+			<a style="color: #2d3748">"</a>
 		</h1>
 		<a href="http://3.88.2.27/"
 			><img
@@ -73,7 +74,14 @@
 		{% comment %}
 		<h3>Summary ({{ lang }}):</h3>
 		{% endcomment %}
-		<h3>SumTube Summary:</h3>
+		<h3 style="color: #d74f4b">Video ID:</h3>
+		<p>{{ ytId }}</p>
+		<h3 style="color: #d74f4b">Description:</h3>
+		<p>{{ description }}</p>
+		<h3 style="color: #d74f4b">Upload Date:</h3>
+		<p>{{ date }}</p>
+		<hr />
+		<h2>SumTube Summary:</h2>
 		<p>{{ gptSummary }}</p>
 		<h3>Recommended Channels:</h3>
 		<ul>
@@ -81,13 +89,9 @@
 			<li>{{ gptRec2 }}</li>
 		</ul>
 		<hr />
+		{% comment %}
 		<h2 style="color: #d74f4b; text-decoration: underline">YouTube Data</h2>
-		<h3 style="color: #d74f4b">Video ID:</h3>
-		<p>{{ ytId }}</p>
-		<h3 style="color: #d74f4b">Description:</h3>
-		<p>{{ description }}</p>
-		<h3 style="color: #d74f4b">Upload Date:</h3>
-		<p>{{ date }}</p>
+		{% endcomment %}
 		<hr />
 		<h3 style="color: black">SumTube-Generated Transcript:</h3>
 		<p>"{{ transcript }}"</p>
