@@ -17,9 +17,9 @@ openai.api_key_path = "/home/ubuntu/gptKey.txt"
 # openai.api_key_path = "/gptKey.txt"
 
 ###
-# tempStem = 'c:\sc\out'  # '/home/ubuntu/sc/out'#'c:\sc\out'
-# tempWebm = 'c:\sc\out.webm'  # '/home/ubuntu/sc/out.webm'#'c:\sc\out.webm'#
-# tempFlac = 'c:\sc\out.flac'  # '/home/ubuntu/sc/out.flac'#'c:\sc\out.flac'#
+tempStem = '/home/ubuntu/sc/out'
+tempWebm = '/home/ubuntu/sc/out.webm'
+tempFlac = '/home/ubuntu/sc/out.flac'
 ###
 # Hardcoded transcribe_audio() for testing purposes
 # def transcribe_audio(audio_file):
