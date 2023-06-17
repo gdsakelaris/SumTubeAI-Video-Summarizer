@@ -14,6 +14,7 @@ import speech_recognition as sr
 from json import JSONDecodeError
 ###
 openai.api_key_path = "/home/ubuntu/OA-API-K.txt"
+#openai.api_key_path = "/OA-API-K.txt"
 
 ###
 tempStem = '/home/ubuntu/sc/out'
@@ -134,18 +135,20 @@ def get_results(request):
             return render(request, 'error.html', {'error': f'Inputted URL was invalid. Could not recognize Youtube ID in URL: {inputUrl}'})
 
         # Get Language from POST
-        inputLangCode = request.POST.get('language')
-        langString = inputLangCode
-        try:
-            langString = pycountry.languages.get(alpha_2=inputLangCode).name
-        except AttributeError as ex:
-            print("PYCOUNTRY FAILED WITH ERROR: " + str(ex))
-            return render(request, 'error.html', {'error': f'PYCOUNTRY failed with error: {str(ex)}'})
+        # inputLangCode = request.POST.get('language')
+        # langString = inputLangCode
+        # try:
+        #     langString = pycountry.languages.get(alpha_2=inputLangCode).name
+        # except AttributeError as ex:
+        #     print("PYCOUNTRY FAILED WITH ERROR: " + str(ex))
+        #     return render(request, 'error.html', {'error': f'PYCOUNTRY failed with error: {str(ex)}'})
 
         # Check if the URL already exists in the database
-        if Video.objects.filter(ytId=ytId, lang=langString).exists():
+        # if Video.objects.filter(ytId=ytId, lang=langString).exists():
+        if Video.objects.filter(ytId=ytId).exists():
             # URL already exists, get the Video object
-            vid = Video.objects.get(ytId=ytId, lang=langString)
+            # vid = Video.objects.get(ytId=ytId, lang=langString)
+            vid = Video.objects.get(ytId=ytId)
             # Retrieve data from Video
             context = {
                 'ytId': vid.ytId,
