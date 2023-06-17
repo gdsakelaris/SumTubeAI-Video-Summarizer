@@ -23,5 +23,5 @@ app_name = 'SumTube_Project'
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('results/', views.add_transcript, name='results'),
+    path('results/', views.get_results, name='results'),
 ]

@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from .models import Video, Ticket
+from .models import Video  # , Ticket
 import pycountry
 import tempfile
 import openai
@@ -13,8 +13,7 @@ from datetime import datetime
 import speech_recognition as sr
 from json import JSONDecodeError
 ###
-openai.api_key_path = "/home/ubuntu/gptKey.txt"
-# openai.api_key_path = "/gptKey.txt"
+openai.api_key_path = "/home/ubuntu/OA-API-K.txt"
 
 ###
 tempStem = '/home/ubuntu/sc/out'
@@ -119,7 +118,7 @@ def extract_video_id(url):
 
 
 @login_required
-def add_transcript(request):
+def get_results(request):
     if request.method == 'POST':
         proceed = False
         # Get URL from POST
@@ -155,12 +154,12 @@ def add_transcript(request):
                 'date': vid.published_date,
                 'description': vid.description,
                 'transcript': vid.transcript,
-                'gptRaw': vid.gptRaw,
+                'STRaw': vid.STRaw,
                 'lang': vid.lang,
-                'gptSummary': vid.gptSummary,
-                'gptRec1': vid.gptRec1,
-                'gptRec2': vid.gptRec2,
-                # 'gptRec3': vid.gptRec3,
+                'STSummary': vid.STSummary,
+                'STRec1': vid.STRec1,
+                'STRec2': vid.STRec2,
+                # 'STRec3': vid.STRec3,
             }
             # Pass the context to the template
             return render(request, 'results.html', context)
@@ -235,21 +234,21 @@ def add_transcript(request):
                     return render(request, 'error.html', {'error': f'OPENAI FAILED WITH ERROR: {strEx}'})
 
                 # Get the response
-                gptRaw = response.choices[0].text
-                print(gptRaw)
+                STRaw = response.choices[0].text
+                print(STRaw)
                 print(inputLangCode)
                 print(langString)
                 # Parse the JSON
-                gptSummary = 'JSON Parsing Failed'
-                gptRec1 = 'JSON Parsing Failed'
-                gptRec2 = 'JSON Parsing Failed'
-                # gptRec3 = 'JSON Parsing Failed'
+                STSummary = 'JSON Parsing Failed'
+                STRec1 = 'JSON Parsing Failed'
+                STRec2 = 'JSON Parsing Failed'
+                # STRec3 = 'JSON Parsing Failed'
                 try:
-                    gptJson = json.loads(gptRaw)
-                    gptSummary = gptJson['tldr']
-                    gptRec1 = gptJson['rec1']
-                    gptRec2 = gptJson['rec2']
-                    # gptRec3 = gptJson['rec3']
+                    STJson = json.loads(STRaw)
+                    STSummary = STJson['tldr']
+                    STRec1 = STJson['rec1']
+                    STRec2 = STJson['rec2']
+                    # STRec3 = STJson['rec3']
                 except JSONDecodeError as e:
                     print(e)
 
@@ -261,12 +260,12 @@ def add_transcript(request):
                     description=description,
                     published_date=date,
                     transcript=transcript,
-                    gptRaw=gptRaw,
+                    STRaw=STRaw,
                     lang=langString,
-                    gptSummary=gptSummary,
-                    gptRec1=gptRec1,
-                    gptRec2=gptRec2,
-                    # gptRec3=gptRec3,
+                    STSummary=STSummary,
+                    STRec1=STRec1,
+                    STRec2=STRec2,
+                    # STRec3=STRec3,
                 )
                 vid = Video.objects.get(ytId=ytId, lang=langString)
 
@@ -278,12 +277,12 @@ def add_transcript(request):
                     'date': vid.published_date,
                     'description': vid.description,
                     'transcript': vid.transcript,
-                    'gptRaw': vid.gptRaw,
+                    'STRaw': vid.STRaw,
                     'lang': vid.lang,
-                    'gptSummary': vid.gptSummary,
-                    'gptRec1': vid.gptRec1,
-                    'gptRec2': vid.gptRec2,
-                    # 'gptRec3': vid.gptRec3,
+                    'STSummary': vid.STSummary,
+                    'STRec1': vid.STRec1,
+                    'STRec2': vid.STRec2,
+                    # 'STRec3': vid.STRec3,
                 }
                 return render(request, 'results.html', context)
             else:
