@@ -14,7 +14,6 @@ import speech_recognition as sr
 from json import JSONDecodeError
 ###
 openai.api_key_path = "/home/ubuntu/OA-API-K.txt"
-#openai.api_key_path = "/OA-API-K.txt"
 
 ###
 tempStem = '/home/ubuntu/sc/out'
@@ -135,20 +134,18 @@ def get_results(request):
             return render(request, 'error.html', {'error': f'Inputted URL was invalid. Could not recognize Youtube ID in URL: {inputUrl}'})
 
         # Get Language from POST
-        # inputLangCode = request.POST.get('language')
-        # langString = inputLangCode
-        # try:
-        #     langString = pycountry.languages.get(alpha_2=inputLangCode).name
-        # except AttributeError as ex:
-        #     print("PYCOUNTRY FAILED WITH ERROR: " + str(ex))
-        #     return render(request, 'error.html', {'error': f'PYCOUNTRY failed with error: {str(ex)}'})
+        inputLangCode = request.POST.get('language')
+        langString = inputLangCode
+        try:
+            langString = pycountry.languages.get(alpha_2=inputLangCode).name
+        except AttributeError as ex:
+            print("PYCOUNTRY FAILED WITH ERROR: " + str(ex))
+            return render(request, 'error.html', {'error': f'PYCOUNTRY failed with error: {str(ex)}'})
 
         # Check if the URL already exists in the database
-        # if Video.objects.filter(ytId=ytId, lang=langString).exists():
-        if Video.objects.filter(ytId=ytId).exists():
+        if Video.objects.filter(ytId=ytId, lang=langString).exists():
             # URL already exists, get the Video object
-            # vid = Video.objects.get(ytId=ytId, lang=langString)
-            vid = Video.objects.get(ytId=ytId)
+            vid = Video.objects.get(ytId=ytId, lang=langString)
             # Retrieve data from Video
             context = {
                 'ytId': vid.ytId,
@@ -209,7 +206,7 @@ def get_results(request):
                 # print("Tokens Used: " + str(maxTokens))
                 # Full Prompt in JSON syntax
                 prompt_data = {
-                    "response-task": f"You are to produce a TL;DR (summary) from a Youtube Transcript, stored in 'yt-metadata'. The TL;DR must be at least 5 complete sentences, but ideally it should be roughly 5-15 sentences depending on the length of the transcript. The TL;DR must be in English. Furthermore, you will also recommend 2 unique Youtube Channels related to this video. You will perform these tasks according to the following format and rules.",
+                    "response-task": f"You are to produce a TL;DR (summary) from a Youtube Transcript, stored in 'yt-metadata'. The TL;DR must be at least 5 complete sentences, but ideally it should be roughly 5-15 sentences depending on the length of the transcript.The TL;DR must be in English. Furthermore, you will also recommend 2 unique Youtube Channels related to this video. You will perform these tasks according to the following format and rules.",
                     "response-format": '{ "tldr": "<tldr-response>", "rec1": "<recommendation-response-1>", "rec2": "<recommendation-response-2>" }',
                     "response-rules": f"You will return your responses as a JSON object structured like 'response-format'. That is, it will be a parseable JSON object where the keys are 'tldr', 'rec1', and 'rec2' and the values for each are your responses. The values are forbidden from including double quotes since it must be parseable JSON. Again, ensure JSON syntax is followed so that I can parse your response as JSON, so each key and value must be bound by double quotes (per JSON syntax). Values must be bound by a set of double quotes, do not forget this. Parseable JSON is the most important aspect of your response.",
                     "tldr-rules": f"The value for 'tldr' should not contain any recommendation information, as that should only appear in the 'recX' values. The 'tldr' value should only contain the TL;DR sentence(s). The response is forbidden from containing double quotes.",
