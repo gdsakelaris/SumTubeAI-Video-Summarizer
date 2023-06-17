@@ -6,7 +6,7 @@ app_name = 'SumTube_Project'
 
 urlpatterns = [
     path("", views.index),
-    path('admin/', admin.site.urls),
+    # path('admin/', admin.site.urls),
     re_path('results/', views.add_transcript, name='results'),
     # re_path('add_transcript/', views.add_transcript, name='add_transcript'),
     # re_path('contact/', views.contact, name='contact'),
