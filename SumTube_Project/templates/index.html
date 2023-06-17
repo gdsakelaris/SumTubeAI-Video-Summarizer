@@ -102,7 +102,8 @@
 		</style>
 	</head>
 	<body>
-		<a href="http://127.0.0.1:8000/SumTube_Project/">
+		{% comment %} <a href="http://127.0.0.1:8000/SumTube_Project/"> {% endcomment %}
+      <a href="{% url 'SumTube_Project:index' %}">
 			<img
 				src="{% static 'SumTube_Project/assets/images/sumtube.png' %}"
 				alt="home"
