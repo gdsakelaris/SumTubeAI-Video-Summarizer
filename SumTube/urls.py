@@ -23,6 +23,6 @@ urlpatterns = [
     # path("SumTube_Project/", include('SumTube_Project.urls')),
     # path('accounts/', include('django.contrib.auth.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
-    path('sumtube/', include('SumTube_Project.urls')),
+    path('home/', include('SumTube_Project.urls')),
     path('admin/', admin.site.urls),
 ]
