@@ -202,7 +202,7 @@ def add_transcript(request):
                     "description": description,
                     "transcript": transcript
                 }
-                maxTokens = int(inputTokens)
+                # maxTokens = int(inputTokens)
                 maxSentenceCount = 1
                 print("Tokens Used: " + str(maxTokens))
                 # Full Prompt in JSON syntax
