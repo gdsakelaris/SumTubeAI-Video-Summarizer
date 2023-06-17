@@ -290,7 +290,6 @@ def add_transcript(request):
                 return render(request, 'results.html')
     else:
         # HTML Request was not 'POST'
-        # return render(request, 'add_transcript.html')
         return render(request, 'results.html')
 
 
@@ -300,8 +299,3 @@ def index(request):
     # videos = Video.objects.all()
     # context = {'videos': videos}
     return render(request, 'index.html')
-
-
-@login_required
-def contact(request):
-    return render(request, 'contact.html')
