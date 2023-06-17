@@ -153,7 +153,7 @@ def get_results(request):
                 'vidTitle': vid.title,
                 'date': vid.published_date,
                 'description': vid.description,
-                'transcript': vid.transcript,
+                'STtranscript': vid.STtranscript,
                 'STRaw': vid.STRaw,
                 'lang': vid.lang,
                 'STSummary': vid.STSummary,
