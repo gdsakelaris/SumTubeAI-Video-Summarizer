@@ -33,7 +33,7 @@ tempFlac = '/home/ubuntu/sc/out.flac'
 def transcribe_audio(audio_file):
     recognizer = sr.Recognizer()
     recognizer.energy_threshold = 300
-    transcript = ''
+    STtranscript = ''
 
     with sr.AudioFile(audio_file) as source:
         audio_duration = math.ceil(source.DURATION)
@@ -51,14 +51,14 @@ def transcribe_audio(audio_file):
 
             try:
                 chunk_transcript = recognizer.recognize_google(audio_data)
-                transcript += chunk_transcript + ' '
+                STtranscript += chunk_transcript + ' '
             except sr.UnknownValueError:
                 print("Google Speech Recognition could not understand audio")
             except sr.RequestError as e:
                 print(
                     f"\nCould not request results from Google Speech Recognition service; {e}\n")
-    transcript = transcript[0].upper() + transcript[1:] + "."
-    return transcript
+    STtranscript = STtranscript[0].upper() + STtranscript[1:] + "."
+    return STtranscript
 
 # ##
 # Hardcoded ydl() for testing purposes
@@ -92,11 +92,11 @@ def downloadAndTranscribe(youtube_url, fileStem):
         return f'FFMPEG FAILED WITH ERROR: {strEx}'
 
     # Transcribe the Youtube Audio
-    transcript = transcribe_audio(tempFp + '.flac')
-    print(f"\n TRANSCRIPT: {transcript} \n")
+    STtranscript = transcribe_audio(tempFp + '.flac')
+    print(f"\n STtranscript: {STtranscript} \n")
 
     # Return the YT data dictionary
-    return {'dict': yt_dict, 'transcript': transcript}
+    return {'dict': yt_dict, 'STtranscript': STtranscript}
 
 # Regex the Youtube ID from a URL
 
@@ -165,7 +165,7 @@ def get_results(request):
             return render(request, 'results.html', context)
         else:
             # URL does not exist
-            transcript = 'null'
+            STtranscript = 'null'
 
             # Hand 'tempDir' in a 'with' context manager
             with tempfile.TemporaryDirectory() as tempDir:
@@ -185,7 +185,7 @@ def get_results(request):
             # OPENAI API
             if proceed:
                 # Take data
-                transcript = dataAndTranscript['transcript']
+                STtranscript = dataAndTranscript['STtranscript']
                 yt_data = dataAndTranscript['dict']
                 title = yt_data.get('title', 'Title Not Found')
                 dateObj = datetime.strptime(
@@ -199,7 +199,7 @@ def get_results(request):
                 video_data = {
                     "title": title,
                     "description": description,
-                    "transcript": transcript
+                    "STtranscript": STtranscript
                 }
                 # maxTokens = int(inputTokens)
                 maxSentenceCount = 1
@@ -259,7 +259,7 @@ def get_results(request):
                     title=title,
                     description=description,
                     published_date=date,
-                    transcript=transcript,
+                    STtranscript=STtranscript,
                     STRaw=STRaw,
                     lang=langString,
                     STSummary=STSummary,
@@ -276,7 +276,7 @@ def get_results(request):
                     'vidTitle': vid.title,
                     'date': vid.published_date,
                     'description': vid.description,
-                    'transcript': vid.transcript,
+                    'STtranscript': vid.STtranscript,
                     'STRaw': vid.STRaw,
                     'lang': vid.lang,
                     'STSummary': vid.STSummary,
