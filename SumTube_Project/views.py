@@ -204,7 +204,7 @@ def add_transcript(request):
                 }
                 # maxTokens = int(inputTokens)
                 maxSentenceCount = 1
-                print("Tokens Used: " + str(maxTokens))
+                # print("Tokens Used: " + str(maxTokens))
                 # Full Prompt in JSON syntax
                 prompt_data = {
                     "response-task": f"You are to produce a TL;DR from a Youtube Transcript, stored in 'yt-metadata'. The TL;DR must be in {langString} and it is restricted to using {str(maxSentenceCount)} sentence(s) at maximum. Furthermore, you will also recommend 2 unique Youtube Channels related to this video. You will perform these tasks according to the following format and rules.",
