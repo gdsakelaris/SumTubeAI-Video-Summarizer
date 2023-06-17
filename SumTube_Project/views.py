@@ -202,11 +202,11 @@ def get_results(request):
                     "STtranscript": STtranscript
                 }
                 # maxTokens = int(inputTokens)
-                maxSentenceCount = 1
+                # maxSentenceCount = 1
                 # print("Tokens Used: " + str(maxTokens))
                 # Full Prompt in JSON syntax
                 prompt_data = {
-                    "response-task": f"You are to produce a TL;DR (summary) from a Youtube Transcript, stored in 'yt-metadata'. The TL;DR must be at least 3 complete sentences, but ideally it should be roughly 5-10 sentences depending on the length of the transcript. The TL;DR must be in English. Furthermore, you will also recommend 2 unique Youtube Channels related to this video. You will perform these tasks according to the following format and rules.",
+                    "response-task": f"You are to produce a TL;DR (summary) from a Youtube Transcript, stored in 'yt-metadata'. The TL;DR must be at least 5 complete sentences, but ideally it should be roughly 5-15 sentences depending on the length of the transcript. A good rule for the TL;DR (summary) is that it should contain AT LEAST 1/4 of the amount of words that the transcript contains (for example, if the transcript contains 100 words, the TL;DR summary should contain AT LEAST 25 words). The TL;DR must be in English. Furthermore, you will also recommend 2 unique Youtube Channels related to this video. You will perform these tasks according to the following format and rules.",
                     "response-format": '{ "tldr": "<tldr-response>", "rec1": "<recommendation-response-1>", "rec2": "<recommendation-response-2>" }',
                     "response-rules": f"You will return your responses as a JSON object structured like 'response-format'. That is, it will be a parseable JSON object where the keys are 'tldr', 'rec1', and 'rec2' and the values for each are your responses. The values are forbidden from including double quotes since it must be parseable JSON. Again, ensure JSON syntax is followed so that I can parse your response as JSON, so each key and value must be bound by double quotes (per JSON syntax). Values must be bound by a set of double quotes, do not forget this. Parseable JSON is the most important aspect of your response.",
                     "tldr-rules": f"The value for 'tldr' should not contain any recommendation information, as that should only appear in the 'recX' values. The 'tldr' value should only contain the TL;DR sentence(s). The response is forbidden from containing double quotes.",
@@ -222,7 +222,7 @@ def get_results(request):
                     response = openai.Completion.create(
                         model="text-davinci-003",
                         prompt=prompt,
-                        max_tokens=500,
+                        max_tokens=1000,
                         temperature=0.7,
                         top_p=0.5,
                         # frequency_penalty=0.0,
