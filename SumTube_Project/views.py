@@ -291,7 +291,8 @@ def add_transcript(request):
                 return render(request, 'add_transcript.html')
     else:
         # HTML Request was not 'POST'
-        return render(request, 'add_transcript.html')
+        # return render(request, 'add_transcript.html')
+        return render(request, 'results.html')
 
 
 @login_required
