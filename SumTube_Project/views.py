@@ -124,8 +124,8 @@ def add_transcript(request):
         proceed = False
         # Get URL from POST
         inputUrl = request.POST.get('address')
-        inputTokens = request.POST.get('input-tokens')
-        print(inputTokens)
+        # inputTokens = request.POST.get('input-tokens')
+        # print(inputTokens)
         ytId = extract_video_id(inputUrl)
         if ytId is not None:
             print(f"\nTHIS IS ID {ytId}\n")
@@ -223,7 +223,7 @@ def add_transcript(request):
                     response = openai.Completion.create(
                         model="text-davinci-003",
                         prompt=prompt,
-                        max_tokens=maxTokens,
+                        # max_tokens=maxTokens,
                         temperature=0.7,
                         top_p=0.5,
                         # frequency_penalty=0.0,
