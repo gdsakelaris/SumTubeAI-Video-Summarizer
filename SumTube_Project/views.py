@@ -12,9 +12,12 @@ import re
 from datetime import datetime
 import speech_recognition as sr
 from json import JSONDecodeError
+from youtube_transcript_api import YouTubeTranscriptApi
+from pytube import YouTube
+###
+
 ###
 openai.api_key_path = "/home/ubuntu/OA-API-K.txt"
-###
 tempStem = '/home/ubuntu/sc/out'
 tempWebm = '/home/ubuntu/sc/out.webm'
 tempFlac = '/home/ubuntu/sc/out.flac'
@@ -81,7 +84,26 @@ def downloadAndTranscribe(youtube_url, fileStem):
     print(f"\n STtranscript: {STtranscript} \n")
 
     # Return the YT data dictionary
-    return {'dict': yt_dict, 'STtranscript': STtranscript}
+    try:
+        # Get video id from URL
+        video_id = YouTube(youtube_url).video_id
+
+        # Get the transcript of the video
+        transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
+
+        # Concatenate the text from each transcript
+        YTtranscript = ' '.join(transcript['text']
+                                for transcript in transcript_list)
+
+        # Capitalize the transcript
+        YTtranscript = YTtranscript.capitalize() + '.'
+
+        # return YTtranscript
+        return {'dict': yt_dict, 'STtranscript': STtranscript, 'YTtranscript': YTtranscript}
+    except Exception as ex:
+        print(f"\nTranscription failed with error: {str(ex)}\n")
+        # return ''
+        return {'dict': yt_dict, 'STtranscript': STtranscript, 'YTtranscript': YTtranscript}
 
 # Regex the Youtube ID from a URL
 
@@ -139,6 +161,7 @@ def get_results(request):
                 'date': vid.published_date,
                 'description': vid.description,
                 'STtranscript': vid.STtranscript,
+                'YTtranscript': vid.YTtranscript,
                 'STRaw': vid.STRaw,
                 'lang': vid.lang,
                 'STSummary': vid.STSummary,
@@ -171,6 +194,7 @@ def get_results(request):
             if proceed:
                 # Take data
                 STtranscript = dataAndTranscript['STtranscript']
+                YTtranscript = dataAndTranscript['YTtranscript']
                 yt_data = dataAndTranscript['dict']
                 title = yt_data.get('title', 'Title Not Found')
                 dateObj = datetime.strptime(
@@ -184,19 +208,22 @@ def get_results(request):
                 video_data = {
                     "title": title,
                     "description": description,
-                    "STtranscript": STtranscript
+                    "STtranscript": STtranscript,
+                    "YTtranscript": YTtranscript
                 }
-                # maxTokens = int(inputTokens)
-                # maxSentenceCount = 1
-                # print("Tokens Used: " + str(maxTokens))
-                # Full Prompt in JSON syntax
+
                 prompt_data = {
-                    "response-task": f"You are to generate a concise and informative summary (TL;DR) from a YouTube video's transcript, which is stored in the 'yt-metadata' field. The TL;DR summary should capture the main points and key information of the video. It should be written in clear and understandable English. Additionally, you need to recommend two unique YouTube channels related to the video. Follow the format and rules below to complete these tasks effectively.",
+                    "response-task": "You are to generate a detailed and comprehensive summary (TL;DR) from a YouTube video's transcript, which is stored in the 'yt-metadata' field. The TL;DR summary should capture the main points, key information, and contextual details of the video. It should be written in clear and understandable English, providing a thorough overview. Additionally, recommend two unique YouTube channels relevant to the video. Follow the format and rules below to complete these tasks effectively.",
                     "response-format": '{{"tldr": "{tldr-response}", "rec1": "{recommendation-response-1}", "rec2": "{recommendation-response-2}"}}',
                     "response-rules": "Your response should be a JSON object structured like the 'response-format' provided. The keys should be 'tldr', 'rec1', and 'rec2', and the values should be your respective responses. The response values should be enclosed in double quotes and follow the JSON syntax. Remember, the parseable JSON format is crucial for successful evaluation.",
-                    "tldr-rules": "The 'tldr' value should contain a concise summary of the video without any recommendation information. It should consist of three to five complete sentences. Avoid using double quotes in your response.",
+                    "tldr-rules": "The 'tldr' value should contain a detailed and comprehensive summary of the video based on the transcript. It should consist of several complete sentences and accurately capture the main points and context of the video. Avoid using double quotes in your response.",
                     "recommendation-rules": "The 'rec1' and 'rec2' values should each recommend a unique YouTube channel related to the video. Ensure that the recommended channels are different. Follow the format: <channel-name>.",
-                    "yt-metadata": video_data
+                    "yt-metadata": {
+                        "title": title,
+                        "description": "",
+                        "STtranscript": STtranscript,
+                        "YTtranscript": YTtranscript
+                    }
                 }
 
                 # Convert prompt_data to JSON string
@@ -245,6 +272,7 @@ def get_results(request):
                     description=description,
                     published_date=date,
                     STtranscript=STtranscript,
+                    YTtranscript=YTtranscript,
                     STRaw=STRaw,
                     lang=langString,
                     STSummary=STSummary,
@@ -262,6 +290,7 @@ def get_results(request):
                     'date': vid.published_date,
                     'description': vid.description,
                     'STtranscript': vid.STtranscript,
+                    'YTtranscript': vid.YTtranscript,
                     'STRaw': vid.STRaw,
                     'lang': vid.lang,
                     'STSummary': vid.STSummary,

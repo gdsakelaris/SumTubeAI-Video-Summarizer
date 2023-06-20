@@ -13,6 +13,7 @@ class Video(models.Model):
     description = models.TextField(default='null')
     published_date = models.DateField(default='null')
     STtranscript = models.TextField(default='null')
+    YTtranscript = models.TextField(default='null')
     STRaw = models.TextField(default='null')
     STSummary = models.TextField(default='null')
     STRec1 = models.TextField(default='null')

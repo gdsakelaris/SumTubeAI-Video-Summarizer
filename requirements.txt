@@ -16,6 +16,7 @@ openai==0.27.8
 psycopg2==2.9.6
 pycountry==22.3.5
 pycryptodomex==3.18.0
+pytube==15.0.0
 requests==2.31.0
 SpeechRecognition==3.10.0
 sqlparse==0.4.4
@@ -24,4 +25,5 @@ tzdata==2023.3
 urllib3==2.0.3
 websockets==11.0.3
 yarl==1.9.2
+youtube-transcript-api==0.6.1
 yt-dlp==2023.3.4
