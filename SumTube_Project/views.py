@@ -19,12 +19,6 @@ tempStem = '/home/ubuntu/sc/out'
 tempWebm = '/home/ubuntu/sc/out.webm'
 tempFlac = '/home/ubuntu/sc/out.flac'
 ###
-# Hardcoded transcribe_audio() for testing purposes
-# def transcribe_audio(audio_file):
-#     # For testing, hardcoded audio_file
-#     audio_file = "/path/to/your/test_audio_file.flac"
-# Step 2: Transcribe FLAC to TXT
-###
 
 
 # Functions

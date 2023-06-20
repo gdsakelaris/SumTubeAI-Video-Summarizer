@@ -52,7 +52,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'SumTube.urls'
-# ROOT_URLCONF = 'SumTube_Project.urls'
 
 
 TEMPLATES = [
