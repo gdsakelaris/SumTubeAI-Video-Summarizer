@@ -13,7 +13,8 @@ from datetime import datetime
 import speech_recognition as sr
 from json import JSONDecodeError
 ###
-openai.api_key_path = "/home/ubuntu/OA-API-K.txt"
+# openai.api_key_path = "/home/ubuntu/OA-API-K.txt"
+openai.api_key = "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"
 
 ###
 tempStem = '/home/ubuntu/sc/out'
@@ -59,14 +60,6 @@ def transcribe_audio(audio_file):
                     f"\nCould not request results from Google Speech Recognition service; {e}\n")
     STtranscript = STtranscript[0].upper() + STtranscript[1:] + "."
     return STtranscript
-
-# ##
-# Hardcoded ydl() for testing purposes
-# def ydl(youtube_url, fileStem):
-#     # For testing, hardcoded youtube_url and fileStem
-#     youtube_url = "https://www.youtube.com/watch?v=-ZsSWltYFGs"
-#     fileStem = "test_video"
-# ##
 
 
 def downloadAndTranscribe(youtube_url, fileStem):
@@ -206,11 +199,11 @@ def get_results(request):
                 # print("Tokens Used: " + str(maxTokens))
                 # Full Prompt in JSON syntax
                 prompt_data = {
-                    "response-task": f"You are to produce a TL;DR (summary) from a YouTube video's transcript, stored in 'yt-metadata'. The TL;DR (summary) must be at least 3 complete sentences, and should not plagiarize the description of the YouTube video. The TL;DR must be in English. Furthermore, you will also recommend 2 unique Youtube Channels related to this video. You will perform these tasks according to the following format and rules.",
-                    "response-format": '{ "tldr": "<tldr-response>", "rec1": "<recommendation-response-1>", "rec2": "<recommendation-response-2>" }',
-                    "response-rules": f"You will return your responses as a JSON object structured like 'response-format'. That is, it will be a parseable JSON object where the keys are 'tldr', 'rec1', and 'rec2' and the values for each are your responses. The values are forbidden from including double quotes since it must be parseable JSON. Again, ensure JSON syntax is followed so that I can parse your response as JSON, so each key and value must be bound by double quotes (per JSON syntax). Values must be bound by a set of double quotes, do not forget this. Parseable JSON is the most important aspect of your response.",
-                    "tldr-rules": f"The value for 'tldr' should not contain any recommendation information, as that should only appear in the 'recX' values. The 'tldr' value should only contain the TL;DR sentence(s). The response is forbidden from containing double quotes.",
-                    "recommendation-rules": f"The values for the 'rec1' and 'rec2' keys should each include a unique YouTube channel. The recommended channels should be two different channels. The format for this response can be <channel-name>.",
+                    "response-task": f"You are to generate a concise and informative summary (TL;DR) from a YouTube video's transcript, which is stored in the 'yt-metadata' field. The TL;DR summary should capture the main points and key information of the video. It should be written in clear and understandable English. Additionally, you need to recommend two unique YouTube channels related to the video. Follow the format and rules below to complete these tasks effectively.",
+                    "response-format": '{{"tldr": "{tldr-response}", "rec1": "{recommendation-response-1}", "rec2": "{recommendation-response-2}"}}',
+                    "response-rules": "Your response should be a JSON object structured like the 'response-format' provided. The keys should be 'tldr', 'rec1', and 'rec2', and the values should be your respective responses. The response values should be enclosed in double quotes and follow the JSON syntax. Remember, the parseable JSON format is crucial for successful evaluation.",
+                    "tldr-rules": "The 'tldr' value should contain a concise summary of the video without any recommendation information. It should consist of three to five complete sentences. Avoid using double quotes in your response.",
+                    "recommendation-rules": "The 'rec1' and 'rec2' values should each recommend a unique YouTube channel related to the video. Ensure that the recommended channels are different. Follow the format: <channel-name>.",
                     "yt-metadata": video_data
                 }
 

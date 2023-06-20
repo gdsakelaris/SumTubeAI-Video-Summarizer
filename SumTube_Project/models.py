@@ -17,14 +17,6 @@ class Video(models.Model):
     STSummary = models.TextField(default='null')
     STRec1 = models.TextField(default='null')
     STRec2 = models.TextField(default='null')
-    # transcript = models.TextField(default='null')
-    # gptRaw = models.TextField(default='null')
-    # gptSummary = models.TextField(default='null')
-    # gptRec1 = models.TextField(default='null')
-    # gptRec2 = models.TextField(default='null')
-    # gptRec3 = models.TextField(default='null')
-    # language = models.CharField(max_length=20)
-    # confidence_score = models.FloatField()
 
     def __str__(self):
         return self.ytId + " | " + self.lang + " | " + self.title

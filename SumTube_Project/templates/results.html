@@ -9,43 +9,9 @@
 			body {
 				font-family: "Roboto", Arial, sans-serif;
 			}
-
-			h1 {
-				color: #2d3748;
-				font-size: 30px;
-			}
-			h3 {
-				color: #3182ce;
-				font-size: 20px;
-			}
-			h1 a {
-				color: #3182ce;
-				text-decoration: none;
-			}
-			h1 a:hover {
-				color: #d74f4b;
-			}
-			h1 a:hover u {
-				color: #d74f4b;
-			}
-			hr {
-				border: 0;
-				height: 2px;
-				background: #2d3748;
-				margin-bottom: 2em;
-			}
-			p {
-				line-height: 1.4;
-				color: black;
-				font-size: 18px;
-			}
 		</style>
 	</head>
 	<body>
-		<h1>
-			<a style="color: #2d3748">Results for: </a>
-			<a href="{{ inputUrl }}"><u>{{ vidTitle }}</u></a>
-		</h1>
 		<a href="http://3.88.2.27/">
 			<img
 				src="{% static 'SumTube_Project/assets/images/sumtube.png' %}"
@@ -53,15 +19,21 @@
 			/>
 		</a>
 		<hr />
-		<h2 style="color: #3182ce">SumTube Summary:</h2>
-		<p>{{ STSummary }}</p>
-		<h4 style="color: gray">SumTube-Generated Transcript:</h4>
-		<p style="color: gray; font-size: small">"{{ STtranscript }}"</p>
-		<h2 style="color: #3182ce">Recommended Channels:</h2>
-		<ul>
-			<li>{{ STRec1 }}</li>
-			<li>{{ STRec2 }}</li>
-		</ul>
+		{% comment %}
+		<h1>
+			<a>Results for: </a>
+			<a href="{{ inputUrl }}"><u>{{ vidTitle }}</u></a>
+		</h1>
+		{% endcomment %}
+		<span style="color: #d74f4b">
+			<h1>SumTube's Summary:</h1>
+			<p>{{ STSummary }}</p>
+			<h2>Recommended Channels:</h2>
+			<ul>
+				<li>{{ STRec1 }}</li>
+				<li>{{ STRec2 }}</li>
+			</ul>
+		</span>
 		<hr />
 		<script>
 			var ytID = "{{ ytId }}";
@@ -79,23 +51,25 @@
 
 			document.body.appendChild(iframeTag);
 		</script>
-
+		<span style="color: #3182c1">
+			<h2 style="text-decoration: underline">YouTube Data:</h2>
+			<h3>Description:</h3>
+			<p>{{ description }}</p>
+			<h3>Upload Date:</h3>
+			<p>{{ date }}</p>
+		</span>
 		{% comment %}
-		<h3>Summary ({{ lang }}):</h3>
-		{% endcomment %}
-		<h3 style="color: #d74f4b">Video ID:</h3>
-		<p>{{ ytId }}</p>
-		<h3 style="color: #d74f4b">Description:</h3>
-		<p>{{ description }}</p>
-		<h3 style="color: #d74f4b">Upload Date:</h3>
-		<p>{{ date }}</p>
-		{% comment %}
-		<h2 style="color: #d74f4b; text-decoration: underline">YouTube Data</h2>
-		{% endcomment %} {% comment %}
-		<h4 style="color: black">SumTube-Generated Transcript:</h4>
-		<p>"{{ transcript }}"</p>
-		<h4 style="color: black">Raw JSON Response:</h4>
-		<p>{{ STRaw }}</p>
+		<span style="color: black">
+			<h2 style="text-decoration: underline">Additional Data:</h2>
+			<h4>SumTube-Generated Transcript:</h4>
+			<p>"{{ STtranscript }}"</p>
+			{c% comment %}
+			<h4>Official YouTube Transcript (if one exists):</h4>
+			<p>"{{ YT_transcript }}"</p>
+			{c% endcomment %}
+			<h4>Language Options:</h4>
+			<p>{{ lang }}</p>
+		</span>
 		{% endcomment %}
 	</body>
 </html>
