@@ -13,9 +13,7 @@ from datetime import datetime
 import speech_recognition as sr
 from json import JSONDecodeError
 ###
-# openai.api_key_path = "/home/ubuntu/OA-API-K.txt"
-openai.api_key = "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"
-
+openai.api_key_path = "/home/ubuntu/OA-API-K.txt"
 ###
 tempStem = '/home/ubuntu/sc/out'
 tempWebm = '/home/ubuntu/sc/out.webm'
