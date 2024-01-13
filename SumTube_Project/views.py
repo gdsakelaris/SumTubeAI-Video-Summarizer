@@ -186,7 +186,7 @@ def add_transcript(request):
                     "description": description,
                     "transcript": transcript
                 }
-                maxTokens = 4000
+                maxTokens = 3000
                 maxSentenceCount = 5
                 # print("Tokens Used: " + str(maxTokens))
                 # Full Prompt in JSON syntax
@@ -207,6 +207,7 @@ def add_transcript(request):
                     response = openai.Completion.create(
                         model="gpt-3.5-turbo-instruct",
                         prompt=prompt,
+                        max_tokens=3000,
                         # max_tokens=maxTokens,
                         temperature=0.7,
                         top_p=0.5,
@@ -224,7 +225,7 @@ def add_transcript(request):
                 print(gptRaw)
                 print(inputLangCode)
                 print(langString)
-                Parse the JSON
+                # Parse the JSON
                 gptSummary = ''
                 gptRec1 = ''
                 gptRec2 = ''
