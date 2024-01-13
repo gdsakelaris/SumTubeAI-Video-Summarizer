@@ -186,20 +186,25 @@ def add_transcript(request):
                     "description": description,
                     "transcript": transcript
                 }
-                maxTokens = 3000
-                maxSentenceCount = 5
+                # maxTokens = 3000
+                maxSentenceCount = 10
                 # print("Tokens Used: " + str(maxTokens))
                 # Full Prompt in JSON syntax
                 prompt_data = {
-                    "response-task": f"You are to produce a TL;DR from a Youtube Transcript, stored in 'yt-metadata'. The TL;DR must be in {langString} and it is restricted to using {str(maxSentenceCount)} sentence(s) at maximum. Furthermore, you will also recommend 2 unique Youtube Channels related to this video. You will perform these tasks according to the following format and rules.",
+                    "response-task": f"You are to produce a TL;DR from a Youtube Transcript, stored in 'yt-metadata'. The TL;DR must be in {langString} and it is restricted to using {str(maxSentenceCount)} sentence(s) at maximum.. Furthermore, you will also recommend 2 unique Youtube Channels related to this video. You will perform these tasks according to the following format and rules.",
                     "response-format": '{ "tldr": "<tldr-response>", "rec1": "<recommendation-response-1>", "rec2": "<recommendation-response-2>" }',
                     "response-rules": f"You will return your responses as a JSON object structured like 'response-format'. That is, it will be a parseable JSON object where the keys are 'tldr', 'rec1', and 'rec2' and the values for each are your responses. The values are forbidden from including double quotes since it must be parseable JSON. Again, ensure JSON syntax is followed so that I can parse your response as JSON, so each key and value must be bound by double quotes (per JSON syntax). Values must be bound by a set of double quotes, do not forget this. Parseable JSON is the most important aspect of your response.",
-                    "tldr-rules": f"The value for 'tldr' should not contain any recommendation information, as that should only appear in the 'recX' values. The 'tldr' value should only contain the TL;DR sentence(s). The response is forbidden from containing double quotes. It can only use {str(maxSentenceCount)} sentence(s) at maximum.",
+                    "tldr-rules": f"The value for 'tldr' should not contain any recommendation information, as that should only appear in the 'recX' values. The 'tldr' value should only contain the TL;DR sentence(s). The response is forbidden from containing double quotes.",
                     "recommendation-rules": f"The values for the 'rec1' and 'rec2' keys should each include a unique YouTube channel and a brief synopsis in {langString} of that recommended channel. The recommended channels should be two different channels. The format for this response can be <channel-name>: <channel-description>.",
                     "yt-metadata": video_data
                 }
-
+                # and it is restricted to using {str(maxSentenceCount)} sentence(s) at maximum.
+                # It can only use {str(maxSentenceCount)} sentence(s) at maximum."
                 # Convert prompt_data to JSON string
+                # Edits
+                prompt_approx_token_count = 1000 
+                max_completion_tokens = 4000 - prompt_approx_token_count 
+                #
                 prompt = json.dumps(prompt_data)
 
                 try:
@@ -207,7 +212,8 @@ def add_transcript(request):
                     response = openai.Completion.create(
                         model="gpt-3.5-turbo-instruct",
                         prompt=prompt,
-                        max_tokens=3000,
+                        max_tokens=max_completion_tokens,
+                        # max_tokens=2000,
                         # max_tokens=maxTokens,
                         temperature=0.7,
                         top_p=0.5,
