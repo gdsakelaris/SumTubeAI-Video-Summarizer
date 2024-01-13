@@ -15,18 +15,6 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-# from django.contrib import admin
-# from django.urls import path, include
-# from django.conf.urls import include  # error was being thrown w/o include
-
-# urlpatterns = [
-#     # path("SumTube_Project/", include('SumTube_Project.urls')),
-#     # path('accounts/', include('django.contrib.auth.urls')),
-#     path('accounts/', include('django.contrib.auth.urls')),
-#     path('home/', include('SumTube_Project.urls')),
-#     path('admin/', admin.site.urls),
-# ]
-
 from django.contrib import admin
 from django.urls import path, include
 

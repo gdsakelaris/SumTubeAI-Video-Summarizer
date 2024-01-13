@@ -13,15 +13,12 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from json import JSONDecodeError
 from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled
-###
 
-###
+
 openai.api_key_path = "/home/ubuntu/OpenAPI_Key.txt"
 tempStem = '/home/ubuntu/sc/out'
 tempWebm = '/home/ubuntu/sc/out.webm'
 tempFlac = '/home/ubuntu/sc/out.flac'
-###
-
 
 # Functions
 def transcribe_audio(audio_file):
@@ -110,9 +107,8 @@ def extract_video_id(url):
     else:
         return None
 
-#                      #
+
 #    VIEWS             #
-#                      #
 @login_required
 def add_transcript(request):
     if request.method == 'POST':
@@ -195,6 +191,7 @@ def add_transcript(request):
                 description = yt_data.get('description', 'Description Not Found')
                 # language = yt_data.get('subtitles', {}).get('language')
                 # subtitles = yt_data.get('subtitles', {})   # if user-loaded, can get .vtt
+
                 # Youtube metadata for prompt
                 video_data = {
                     "title": title,
@@ -240,7 +237,6 @@ def add_transcript(request):
                     print("OPENAI FAILED WITH ERROR: " + strEx)
                     return render(request, 'error.html', { 'error': f'OPENAI FAILED WITH ERROR: {strEx}' })
 
-
                 # Get the response
                 gptRaw = response.choices[0].text
                 print(gptRaw)
@@ -260,7 +256,6 @@ def add_transcript(request):
                 except JSONDecodeError as e:
                     print(e)
                 
-
                 # SAVE TO DATABASE
                 Video.objects.create(
                     ytId=ytId,
@@ -300,7 +295,6 @@ def add_transcript(request):
         # HTML Request was not 'POST'
         return render(request, 'results.html')
 
-
 @login_required
 def post_ticket(request):
     print("in get_contact")
@@ -327,7 +321,6 @@ def index(request):
     # videos = Video.objects.all()
     # context = {'videos': videos}
     return render(request, 'index.html')
-
 
 @login_required
 def contact(request):
