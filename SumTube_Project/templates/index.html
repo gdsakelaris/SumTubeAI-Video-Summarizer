@@ -103,134 +103,105 @@
 	</head>
 	<body>
 		{% comment %} <a href="http://127.0.0.1:8000/SumTube_Project/"> {% endcomment %}
-      <a href="{% url 'SumTube_Project:index' %}">
-			<img
-				src="{% static 'SumTube_Project/assets/images/sumtube.png' %}"
-				alt="home"
-			/>
-		</a>
-		<hr />
+			<a href="{% url 'SumTube_Project:index' %}">
+				<img src="{% static 'SumTube_Project/assets/images/sumtube.png' %}" alt="home" />
+			</a>
+			<hr />
 
-		<div class="search-bar">
-			<form
-				class="search-form"
-				id="search-form"
-				name="gs"
-				method="POST"
-				role="search"
-				action="/results/"
-			>
-				{% csrf_token %}
-				<input
-					type="address"
-					name="address"
-					class="search-input"
-					placeholder="Enter a URL"
-					autocomplete="on"
-					required
-					id="youtube-url-input"
-					oninput="checkInputValidity()"
-				/>
-				<div
-					class="validation-message"
-					id="validation-message"
-				></div>
-				<select
-					name="language"
-					class="form-select"
-					aria-label="Default select example"
-					id="chooseCategory"
-					onchange="this.form.click()"
-				>
-					<option
-						value="en"
-						selected
-					>
-						English
-					</option>
-					{% comment %} <option value="es">Español</option>
-					<option value="fr">Français</option>
-					<option value="de">Deutsch</option>
-					<option value="pt">Português</option>
-					<option value="it">Italiano</option> {% endcomment %}
-				</select>
-				<button
-					class="submit-button"
-					id="submit-button"
-					disabled
-				>
-					<i class="fa fa-search"></i> Summarize
-				</button>
-			</form>
-		</div>
+			<div class="search-bar">
+				<form class="search-form" id="search-form" name="gs" method="POST" role="search"
+					action="/add_transcript/">
+					<!-- <form class="search-form" id="search-form" name="gs" method="POST" role="search" action="/results/"> -->
+					{% csrf_token %}
+					<input type="address" name="address" class="search-input" placeholder="Enter a YouTube video URL"
+						autocomplete="on" required id="youtube-url-input" oninput="checkInputValidity()" />
+					<div class="validation-message" id="validation-message"></div>
+					<select name="language" class="form-select" aria-label="Default select example" id="chooseCategory"
+						onchange="this.form.click()">
+						<option value="en" selected>
+							English
+						</option>
+						<!-- <option value="es">Español</option>
+						<option value="fr">Français</option>
+						<option value="de">Deutsch</option>
+						<option value="pt">Português</option>
+						<option value="it">Italiano</option>  -->
+					</select>
+					<button class="submit-button" id="submit-button" disabled>
+						<i class="fa fa-search"></i> Summarize
+					</button>
+				</form>
+			</div>
+			<!-- <div>
+				<a href="https://www.youtube.com/playlist?list=PL0vfts4VzfNiI1BsIK5u7LpPaIDKMJIDN" target="_blank"></a>
+			</div> -->
+			<script>
+				// Check if a Youtube ID is Valid
+				function validVideoId(id) {
+					var videoUrl = "https://www.youtube.com/watch?v=" + id;
+					var iframe = document.createElement("iframe");
+					iframe.src = videoUrl;
 
-		<script>
-			// Check if a Youtube ID is Valid
-			function validVideoId(id) {
-				var videoUrl = "https://www.youtube.com/watch?v=" + id;
-				var iframe = document.createElement("iframe");
-				iframe.src = videoUrl;
+					iframe.onload = function () {
+						if (iframe.contentDocument.querySelector("video")) {
+							console.log("Valid video ID");
+						} else {
+							console.log("Invalid video ID");
+						}
+					};
 
-				iframe.onload = function () {
-					if (iframe.contentDocument.querySelector("video")) {
-						console.log("Valid video ID");
-					} else {
-						console.log("Invalid video ID");
-					}
-				};
-
-				document.body.appendChild(iframe);
-			}
-			// Regex the Youtube ID from a URL
-			function extractVideoId(url) {
-				// Regular expression pattern to match YouTube video IDs
-				var pattern =
-					/(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]+)/;
-				// Find the video ID using the pattern
-				var match = pattern.exec(url);
-				if (match) {
-					var videoId = match[1];
-					return videoId;
-				} else {
-					return null;
+					document.body.appendChild(iframe);
 				}
-			}
-			// Function to check input validity and enable/disable the submit button
-			function checkInputValidity() {
-				const dotComRegex =
-					/^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|v\/|playlist\?list=))([\w-]{11})(?:\S+)?$/;
-				const dotBeRegex = /^(?:https?:\/\/)?youtu\.be\/([\w-]{11})(?:\S+)?$/;
-				var urlInput = document.getElementById("youtube-url-input").value;
-				var urlIsValid =
-					dotComRegex.test(urlInput) || dotBeRegex.test(urlInput);
-				var ytId = extractVideoId(urlInput);
-
-				var validationMessage = document.getElementById("validation-message");
-				var submitButton = document.getElementById("submit-button");
-
-				submitButton.style.backgroundColor = "#d74f4b"; // Red (default)
-
-				if (urlIsValid && ytId !== null) {
-					if (ytId.length === 11) {
-						// URL and ID are valid
-						validationMessage.textContent = "";
-						submitButton.disabled = false;
-						submitButton.classList.remove("invalid-url");
-						submitButton.style.backgroundColor = "#4CAF50"; // Green
+				// Regex the Youtube ID from a URL
+				function extractVideoId(url) {
+					// Regular expression pattern to match YouTube video IDs
+					var pattern =
+						/(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]+)/;
+					// Find the video ID using the pattern
+					var match = pattern.exec(url);
+					if (match) {
+						var videoId = match[1];
+						return videoId;
 					} else {
-						// ID is invalid
-						validationMessage.textContent =
-							"Youtube ID is invalid (too long/short)";
+						return null;
+					}
+				}
+				// Function to check input validity and enable/disable the submit button
+				function checkInputValidity() {
+					const dotComRegex =
+						/^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|v\/|playlist\?list=))([\w-]{11})(?:\S+)?$/;
+					const dotBeRegex = /^(?:https?:\/\/)?youtu\.be\/([\w-]{11})(?:\S+)?$/;
+					var urlInput = document.getElementById("youtube-url-input").value;
+					var urlIsValid =
+						dotComRegex.test(urlInput) || dotBeRegex.test(urlInput);
+					var ytId = extractVideoId(urlInput);
+
+					var validationMessage = document.getElementById("validation-message");
+					var submitButton = document.getElementById("submit-button");
+
+					submitButton.style.backgroundColor = "#d74f4b"; // Red (default)
+
+					if (urlIsValid && ytId !== null) {
+						if (ytId.length === 11) {
+							// URL and ID are valid
+							validationMessage.textContent = "";
+							submitButton.disabled = false;
+							submitButton.classList.remove("invalid-url");
+							submitButton.style.backgroundColor = "#4CAF50"; // Green
+						} else {
+							// ID is invalid
+							validationMessage.textContent =
+								"Youtube ID is invalid (too long/short)";
+							submitButton.disabled = true;
+							submitButton.classList.add("invalid-url");
+						}
+					} else {
+						// URL format is invalid
+						validationMessage.textContent = "Invalid Youtube URL Format";
 						submitButton.disabled = true;
 						submitButton.classList.add("invalid-url");
 					}
-				} else {
-					// URL format is invalid
-					validationMessage.textContent = "Invalid Youtube URL Format";
-					submitButton.disabled = true;
-					submitButton.classList.add("invalid-url");
 				}
-			}
-		</script>
+			</script>
 	</body>
 </html>

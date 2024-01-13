@@ -12,22 +12,24 @@ class Video(models.Model):
     title = models.CharField(max_length=200, default='null')
     description = models.TextField(default='null')
     published_date = models.DateField(default='null')
-    STtranscript = models.TextField(default='null')
-    YTtranscript = models.TextField(default='null')
-    STRaw = models.TextField(default='null')
-    STSummary = models.TextField(default='null')
-    STRec1 = models.TextField(default='null')
-    STRec2 = models.TextField(default='null')
+    transcript = models.TextField(default='null')
+    gptRaw = models.TextField(default='null')
+    gptSummary = models.TextField(default='null')
+    gptRec1 = models.TextField(default='null')
+    gptRec2 = models.TextField(default='null')
+    #gptRec3 = models.TextField(default='null')
+    #language = models.CharField(max_length=20)
+    #confidence_score = models.FloatField()
 
     def __str__(self):
         return self.ytId + " | " + self.lang + " | " + self.title
 
 
-# class Ticket(models.Model):
-#     name = models.CharField(max_length=100)
-#     surname = models.CharField(max_length=100)
-#     email = models.EmailField()
-#     message = models.TextField()
+class Ticket(models.Model):
+    name = models.CharField(max_length=100)
+    surname = models.CharField(max_length=100)
+    email = models.EmailField()
+    message = models.TextField()
 
-#     def __str__(self):
-#         return f"{self.name} {self.surname}"
+    def __str__(self):
+        return f"{self.name} {self.surname}"

@@ -13,10 +13,7 @@
 	</head>
 	<body>
 		<a href="http://3.88.2.27/">
-			<img
-				src="{% static 'SumTube_Project/assets/images/sumtube.png' %}"
-				alt="home"
-			/>
+			<img src="{% static 'SumTube_Project/assets/images/sumtube.png' %}" alt="home" />
 		</a>
 		<hr />
 		{% comment %}
@@ -27,11 +24,11 @@
 		{% endcomment %}
 		<span style="color: #d74f4b">
 			<h1>SumTube's Summary:</h1>
-			<p>{{ STSummary }}</p>
+			<p>{{ gptSummary }}</p>
 			<h2>Recommended Channels:</h2>
 			<ul>
-				<li>{{ STRec1 }}</li>
-				<li>{{ STRec2 }}</li>
+				<li>{{ gptRec1 }}</li>
+				<li>{{ gptRec2 }}</li>
 			</ul>
 		</span>
 		<hr />
@@ -51,12 +48,5 @@
 
 			document.body.appendChild(iframeTag);
 		</script>
-		<span style="color: #3182c1">
-			<h2 style="text-decoration: underline">YouTube Data:</h2>
-			<h3>Description:</h3>
-			<p>{{ description }}</p>
-			<h3>Upload Date:</h3>
-			<p>{{ date }}</p>
-		</span>
 	</body>
 </html>

@@ -26,6 +26,7 @@ Including another URLconf
 #     path('home/', include('SumTube_Project.urls')),
 #     path('admin/', admin.site.urls),
 # ]
+
 from django.contrib import admin
 from django.urls import path, include
 

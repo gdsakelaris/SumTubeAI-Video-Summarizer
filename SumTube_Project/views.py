@@ -1,9 +1,6 @@
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from .models import Video  # , Ticket
 import pycountry
 import tempfile
-import openai
+import openai    
 import yt_dlp
 import math
 import json
@@ -11,13 +8,14 @@ import os
 import re
 from datetime import datetime
 import speech_recognition as sr
+from .models import Video, Ticket
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
 from json import JSONDecodeError
-from youtube_transcript_api import YouTubeTranscriptApi
-from pytube import YouTube
 ###
 
 ###
-openai.api_key_path = "/home/ubuntu/OA-API-K.txt"
+openai.api_key_path = "/home/ubuntu/OpenAPI_Key.txt"
 tempStem = '/home/ubuntu/sc/out'
 tempWebm = '/home/ubuntu/sc/out.webm'
 tempFlac = '/home/ubuntu/sc/out.flac'
@@ -25,11 +23,10 @@ tempFlac = '/home/ubuntu/sc/out.flac'
 
 
 # Functions
-
 def transcribe_audio(audio_file):
     recognizer = sr.Recognizer()
     recognizer.energy_threshold = 300
-    STtranscript = ''
+    transcript = ''
 
     with sr.AudioFile(audio_file) as source:
         audio_duration = math.ceil(source.DURATION)
@@ -47,29 +44,30 @@ def transcribe_audio(audio_file):
 
             try:
                 chunk_transcript = recognizer.recognize_google(audio_data)
-                STtranscript += chunk_transcript + ' '
+                transcript += chunk_transcript + ' '
             except sr.UnknownValueError:
                 print("Google Speech Recognition could not understand audio")
             except sr.RequestError as e:
                 print(
                     f"\nCould not request results from Google Speech Recognition service; {e}\n")
-    STtranscript = STtranscript[0].upper() + STtranscript[1:] + "."
-    return STtranscript
-
+    transcript = transcript[0].upper() + transcript[1:]+"."
+    return transcript
 
 def downloadAndTranscribe(youtube_url, fileStem):
+    #
     # Download the YouTube audio and data using yt-dlp
+    #
     tempFp = os.path.join(fileStem, 'out')
     try:
         with yt_dlp.YoutubeDL({'format': 'bestaudio/best', 'writesubtitles': True, 'extractaudio': True, 'outtmpl': f'{tempFp}.%(ext)s'}) as ydlp:
             yt_dict = ydlp.extract_info(youtube_url, download=False)
-            # print(json.dumps(ydlp.sanitize_info(yt_dict)))
+            #print(json.dumps(ydlp.sanitize_info(yt_dict)))
             ydlp.download([youtube_url])
     except Exception as ex:
         strEx = str(ex)
         print('\nYT-DLP FAILED WITH ERROR: \n' + strEx)
         return f'YT-DLP FAILED WITH ERROR: {strEx}'
-
+    
     # Convert .webm to .flac using FFmpeg
     try:
         os.system(f"ffmpeg -y -i {tempFp}.webm -c:a flac {tempFp}.flac")
@@ -78,36 +76,19 @@ def downloadAndTranscribe(youtube_url, fileStem):
         strEx = str(ex)
         print('\nFFMPEG FAILED WITH ERROR: \n' + strEx)
         return f'FFMPEG FAILED WITH ERROR: {strEx}'
+        
 
+    #
     # Transcribe the Youtube Audio
-    STtranscript = transcribe_audio(tempFp + '.flac')
-    print(f"\n STtranscript: {STtranscript} \n")
+    #
+    transcript = transcribe_audio(tempFp + '.flac')
+    print(f"\n TRANSCRIPT: {transcript} \n")
 
     # Return the YT data dictionary
-    try:
-        # Get video id from URL
-        video_id = YouTube(youtube_url).video_id
+    return { 'dict': yt_dict, 'transcript': transcript }
 
-        # Get the transcript of the video
-        transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
-
-        # Concatenate the text from each transcript
-        YTtranscript = ' '.join(transcript['text']
-                                for transcript in transcript_list)
-
-        # Capitalize the transcript
-        YTtranscript = YTtranscript.capitalize() + '.'
-
-        # return YTtranscript
-        return {'dict': yt_dict, 'STtranscript': STtranscript, 'YTtranscript': YTtranscript}
-    except Exception as ex:
-        print(f"\nTranscription failed with error: {str(ex)}\n")
-        # return ''
-        return {'dict': yt_dict, 'STtranscript': STtranscript, 'YTtranscript': YTtranscript}
 
 # Regex the Youtube ID from a URL
-
-
 def extract_video_id(url):
     # Regular expression pattern to match YouTube video IDs
     pattern = r"(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]+)"
@@ -121,25 +102,25 @@ def extract_video_id(url):
     else:
         return None
 
-# Views
-
-
+#                      #
+#    VIEWS             #
+#                      #
 @login_required
-def get_results(request):
+def add_transcript(request):
     if request.method == 'POST':
         proceed = False
         # Get URL from POST
         inputUrl = request.POST.get('address')
-        # inputTokens = request.POST.get('input-tokens')
-        # print(inputTokens)
+        inputTokens = request.POST.get('input-tokens')
+        print(inputTokens)
         ytId = extract_video_id(inputUrl)
         if ytId is not None:
             print(f"\nTHIS IS ID {ytId}\n")
         else:
             # ID could not be Regexed
             print(f"\nERROR: INPUTTED URL WAS NOT A VALID URL, NO ID EXTRACTED\n")
-            return render(request, 'error.html', {'error': f'Inputted URL was invalid. Could not recognize Youtube ID in URL: {inputUrl}'})
-
+            return render(request, 'error.html', { 'error': f'Inputted URL was invalid. Could not recognize Youtube ID in URL: {inputUrl}' })
+        
         # Get Language from POST
         inputLangCode = request.POST.get('language')
         langString = inputLangCode
@@ -147,83 +128,75 @@ def get_results(request):
             langString = pycountry.languages.get(alpha_2=inputLangCode).name
         except AttributeError as ex:
             print("PYCOUNTRY FAILED WITH ERROR: " + str(ex))
-            return render(request, 'error.html', {'error': f'PYCOUNTRY failed with error: {str(ex)}'})
-
+            return render(request, 'error.html', { 'error': f'PYCOUNTRY failed with error: {str(ex)}' })
+        
         # Check if the URL already exists in the database
         if Video.objects.filter(ytId=ytId, lang=langString).exists():
             # URL already exists, get the Video object
             vid = Video.objects.get(ytId=ytId, lang=langString)
             # Retrieve data from Video
             context = {
-                'ytId': vid.ytId,
-                'inputUrl': vid.url,
-                'vidTitle': vid.title,
-                'date': vid.published_date,
-                'description': vid.description,
-                'STtranscript': vid.STtranscript,
-                'YTtranscript': vid.YTtranscript,
-                'STRaw': vid.STRaw,
-                'lang': vid.lang,
-                'STSummary': vid.STSummary,
-                'STRec1': vid.STRec1,
-                'STRec2': vid.STRec2,
-                # 'STRec3': vid.STRec3,
-            }
+                        'ytId': vid.ytId,
+                        'inputUrl': vid.url,
+                        'vidTitle': vid.title,
+                        'date': vid.published_date,
+                        'description': vid.description,
+                        'transcript': vid.transcript,
+                        'gptRaw': vid.gptRaw,
+                        'lang': vid.lang,
+                        'gptSummary': vid.gptSummary,
+                        'gptRec1': vid.gptRec1,
+                        'gptRec2': vid.gptRec2,
+                        #'gptRec3': vid.gptRec3,
+                      }
             # Pass the context to the template
             return render(request, 'results.html', context)
         else:
             # URL does not exist
-            STtranscript = 'null'
-
+            transcript = 'null'
+            
             # Hand 'tempDir' in a 'with' context manager
             with tempfile.TemporaryDirectory() as tempDir:
                 try:
                     # Returns Metadata and Transcript
-                    dataAndTranscript = downloadAndTranscribe(
-                        inputUrl, tempDir)
+                    dataAndTranscript = downloadAndTranscribe(inputUrl, tempDir)
                     if isinstance(dataAndTranscript, str):
-                        return render(request, 'error.html', {'error': f'DOWNLOAD AND TRANSCRIBE FAILED WITH ERROR: {dataAndTranscript}'})
+                        return render(request, 'error.html', { 'error': f'DOWNLOAD AND TRANSCRIBE FAILED WITH ERROR: {dataAndTranscript}' })
                     elif isinstance(dataAndTranscript, dict):
                         proceed = True
                 except Exception as ex:
                     strEx = str(ex)
                     print("DOWNLOAD AND TRANSCRIBE FAILED WITH ERROR: " + strEx)
-                    return render(request, 'error.html', {'error': f'DOWNLOAD AND TRANSCRIBE FAILED WITH ERROR: {strEx}'})
+                    return render(request, 'error.html', { 'error': f'DOWNLOAD AND TRANSCRIBE FAILED WITH ERROR: {strEx}' })
 
-            # OPENAI API
+        # OPENAI API
             if proceed:
                 # Take data
-                STtranscript = dataAndTranscript['STtranscript']
-                YTtranscript = dataAndTranscript['YTtranscript']
+                transcript = dataAndTranscript['transcript']
                 yt_data = dataAndTranscript['dict']
                 title = yt_data.get('title', 'Title Not Found')
-                dateObj = datetime.strptime(
-                    yt_data.get('upload_date'), "%Y%m%d")
+                dateObj = datetime.strptime(yt_data.get('upload_date'), "%Y%m%d")
                 date = dateObj.strftime('%Y-%m-%d')
-                description = yt_data.get(
-                    'description', 'Description Not Found')
+                description = yt_data.get('description', 'Description Not Found')
                 # language = yt_data.get('subtitles', {}).get('language')
                 # subtitles = yt_data.get('subtitles', {})   # if user-loaded, can get .vtt
                 # Youtube metadata for prompt
                 video_data = {
                     "title": title,
                     "description": description,
-                    "STtranscript": STtranscript,
-                    "YTtranscript": YTtranscript
+                    "transcript": transcript
                 }
-
+                maxTokens = 4000
+                maxSentenceCount = 5
+                # print("Tokens Used: " + str(maxTokens))
+                # Full Prompt in JSON syntax
                 prompt_data = {
-                    "response-task": "You are to generate a detailed and comprehensive summary (TL;DR) from a YouTube video's transcript, which is stored in the 'yt-metadata' field. The TL;DR summary should capture the main points, key information, and contextual details of the video. It should be written in clear and understandable English, providing a thorough overview. Additionally, recommend two unique YouTube channels relevant to the video. Follow the format and rules below to complete these tasks effectively.",
-                    "response-format": '{{"tldr": "{tldr-response}", "rec1": "{recommendation-response-1}", "rec2": "{recommendation-response-2}"}}',
-                    "response-rules": "Your response should be a JSON object structured like the 'response-format' provided. The keys should be 'tldr', 'rec1', and 'rec2', and the values should be your respective responses. The response values should be enclosed in double quotes and follow the JSON syntax. Remember, the parseable JSON format is crucial for successful evaluation.",
-                    "tldr-rules": "The 'tldr' value should contain a detailed and comprehensive summary of the video based on the transcript. It should consist of several complete sentences and accurately capture the main points and context of the video. Avoid using double quotes in your response.",
-                    "recommendation-rules": "The 'rec1' and 'rec2' values should each recommend a unique YouTube channel related to the video. Ensure that the recommended channels are different. Follow the format: <channel-name>.",
-                    "yt-metadata": {
-                        "title": title,
-                        "description": "",
-                        "STtranscript": STtranscript,
-                        "YTtranscript": YTtranscript
-                    }
+                    "response-task": f"You are to produce a TL;DR from a Youtube Transcript, stored in 'yt-metadata'. The TL;DR must be in {langString} and it is restricted to using {str(maxSentenceCount)} sentence(s) at maximum. Furthermore, you will also recommend 2 unique Youtube Channels related to this video. You will perform these tasks according to the following format and rules.",
+                    "response-format": '{ "tldr": "<tldr-response>", "rec1": "<recommendation-response-1>", "rec2": "<recommendation-response-2>" }',
+                    "response-rules": f"You will return your responses as a JSON object structured like 'response-format'. That is, it will be a parseable JSON object where the keys are 'tldr', 'rec1', and 'rec2' and the values for each are your responses. The values are forbidden from including double quotes since it must be parseable JSON. Again, ensure JSON syntax is followed so that I can parse your response as JSON, so each key and value must be bound by double quotes (per JSON syntax). Values must be bound by a set of double quotes, do not forget this. Parseable JSON is the most important aspect of your response.",
+                    "tldr-rules": f"The value for 'tldr' should not contain any recommendation information, as that should only appear in the 'recX' values. The 'tldr' value should only contain the TL;DR sentence(s). The response is forbidden from containing double quotes. It can only use {str(maxSentenceCount)} sentence(s) at maximum.",
+                    "recommendation-rules": f"The values for the 'rec1' and 'rec2' keys should each include a unique YouTube channel and a brief synopsis in {langString} of that recommended channel. The recommended channels should be two different channels. The format for this response can be <channel-name>: <channel-description>.",
+                    "yt-metadata": video_data
                 }
 
                 # Convert prompt_data to JSON string
@@ -232,9 +205,9 @@ def get_results(request):
                 try:
                     # Make Completion API call
                     response = openai.Completion.create(
-                        model="text-davinci-003",
+                        model="gpt-3.5-turbo-instruct",
                         prompt=prompt,
-                        max_tokens=500,
+                        # max_tokens=maxTokens,
                         temperature=0.7,
                         top_p=0.5,
                         # frequency_penalty=0.0,
@@ -243,60 +216,60 @@ def get_results(request):
                 except Exception as ex:
                     strEx = str(ex)
                     print("OPENAI FAILED WITH ERROR: " + strEx)
-                    return render(request, 'error.html', {'error': f'OPENAI FAILED WITH ERROR: {strEx}'})
+                    return render(request, 'error.html', { 'error': f'OPENAI FAILED WITH ERROR: {strEx}' })
+
 
                 # Get the response
-                STRaw = response.choices[0].text
-                print(STRaw)
+                gptRaw = response.choices[0].text
+                print(gptRaw)
                 print(inputLangCode)
                 print(langString)
-                # Parse the JSON
-                STSummary = 'JSON Parsing Failed'
-                STRec1 = 'JSON Parsing Failed'
-                STRec2 = 'JSON Parsing Failed'
-                # STRec3 = 'JSON Parsing Failed'
+                Parse the JSON
+                gptSummary = ''
+                gptRec1 = ''
+                gptRec2 = ''
+                #gptRec3 = ''
                 try:
-                    STJson = json.loads(STRaw)
-                    STSummary = STJson['tldr']
-                    STRec1 = STJson['rec1']
-                    STRec2 = STJson['rec2']
-                    # STRec3 = STJson['rec3']
+                    gptJson = json.loads(gptRaw)
+                    gptSummary = gptJson['tldr']
+                    gptRec1 = gptJson['rec1']
+                    gptRec2 = gptJson['rec2']
+                    #gptRec3 = gptJson['rec3']
                 except JSONDecodeError as e:
                     print(e)
+                
 
-                # Save to DB
+                # SAVE TO DATABASE
                 Video.objects.create(
                     ytId=ytId,
-                    url=inputUrl,
-                    title=title,
-                    description=description,
-                    published_date=date,
-                    STtranscript=STtranscript,
-                    YTtranscript=YTtranscript,
-                    STRaw=STRaw,
-                    lang=langString,
-                    STSummary=STSummary,
-                    STRec1=STRec1,
-                    STRec2=STRec2,
-                    # STRec3=STRec3,
+                    url=inputUrl, 
+                    title=title, 
+                    description=description, 
+                    published_date=date, 
+                    transcript=transcript,
+                    gptRaw=gptRaw, 
+                    lang=langString, 
+                    gptSummary=gptSummary, 
+                    gptRec1=gptRec1,
+                    gptRec2=gptRec2,
+                    #gptRec3=gptRec3,
                 )
                 vid = Video.objects.get(ytId=ytId, lang=langString)
 
-                # Pass context to template
+                # Pass the context to the template
                 context = {
                     'ytId': vid.ytId,
                     'inputUrl': vid.url,
                     'vidTitle': vid.title,
                     'date': vid.published_date,
                     'description': vid.description,
-                    'STtranscript': vid.STtranscript,
-                    'YTtranscript': vid.YTtranscript,
-                    'STRaw': vid.STRaw,
+                    'transcript': vid.transcript,
+                    'gptRaw': vid.gptRaw,
                     'lang': vid.lang,
-                    'STSummary': vid.STSummary,
-                    'STRec1': vid.STRec1,
-                    'STRec2': vid.STRec2,
-                    # 'STRec3': vid.STRec3,
+                    'gptSummary': vid.gptSummary,
+                    'gptRec1': vid.gptRec1,
+                    'gptRec2': vid.gptRec2,
+                    #'gptRec3': vid.gptRec3,
                 }
                 return render(request, 'results.html', context)
             else:
@@ -307,8 +280,33 @@ def get_results(request):
 
 
 @login_required
+def post_ticket(request):
+    print("in get_contact")
+    if request.method == 'POST':
+        try:
+            name = request.POST.get('name')
+            surname = request.POST.get('surname')
+            email = request.POST.get('email')
+            message = request.POST.get('message')
+
+            # Create the Support Ticket in the Database
+            Ticket.objects.create(name=name, surname=surname, email=email, message=message)
+            
+            # Render a response
+            return render(request, 'contact_response.html', {'name': name, 'surname': surname, 'email': email, 'message': message})
+        except Exception as ex:
+            return render(request, 'contact_response.html', {'name': f'error occured: {str(ex)}', 'surname': f'null', 'email': f'null', 'message': 'null'})
+    else:    
+        return render(request, 'contact_response.html', {'name': 'error occured', 'surname': 'error occured', 'email': 'error occured', 'message': 'error occured'})
+
+@login_required
 def index(request):
     # get video objects
     # videos = Video.objects.all()
     # context = {'videos': videos}
     return render(request, 'index.html')
+
+
+@login_required
+def contact(request):
+    return render(request, 'contact.html')
