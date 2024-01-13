@@ -25,5 +25,5 @@ tzdata==2023.3
 urllib3==2.0.3
 websockets==11.0.3
 yarl==1.9.2
-youtube-transcript-api==0.6.1
+youtube-transcript-api==0.6.2
 yt-dlp==2023.3.4

@@ -12,6 +12,7 @@ from .models import Video, Ticket
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from json import JSONDecodeError
+from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled
 ###
 
 ###
@@ -54,38 +55,45 @@ def transcribe_audio(audio_file):
     return transcript
 
 def downloadAndTranscribe(youtube_url, fileStem):
-    #
-    # Download the YouTube audio and data using yt-dlp
-    #
+    # Extract the YouTube ID from the URL
+    ytId = extract_video_id(youtube_url)
+
+    # Define tempFp here
     tempFp = os.path.join(fileStem, 'out')
-    try:
-        with yt_dlp.YoutubeDL({'format': 'bestaudio/best', 'writesubtitles': True, 'extractaudio': True, 'outtmpl': f'{tempFp}.%(ext)s'}) as ydlp:
-            yt_dict = ydlp.extract_info(youtube_url, download=False)
-            #print(json.dumps(ydlp.sanitize_info(yt_dict)))
-            ydlp.download([youtube_url])
-    except Exception as ex:
-        strEx = str(ex)
-        print('\nYT-DLP FAILED WITH ERROR: \n' + strEx)
-        return f'YT-DLP FAILED WITH ERROR: {strEx}'
-    
-    # Convert .webm to .flac using FFmpeg
-    try:
-        os.system(f"ffmpeg -y -i {tempFp}.webm -c:a flac {tempFp}.flac")
-        print(f"\nFFMPEG PRODUCED {tempFp}.flac")
-    except Exception as ex:
-        strEx = str(ex)
-        print('\nFFMPEG FAILED WITH ERROR: \n' + strEx)
-        return f'FFMPEG FAILED WITH ERROR: {strEx}'
-        
 
-    #
-    # Transcribe the Youtube Audio
-    #
-    transcript = transcribe_audio(tempFp + '.flac')
-    print(f"\n TRANSCRIPT: {transcript} \n")
+    try:
+        # Attempt to fetch the transcript
+        transcript_list = YouTubeTranscriptApi.list_transcripts(ytId)
+        transcript = transcript_list.find_transcript(['en']).fetch()
+        full_transcript = ' '.join([t['text'] for t in transcript])
+        return {'dict': {}, 'transcript': full_transcript}
+    except TranscriptsDisabled:
+        # If transcripts are disabled for the video, fall back to voice recognition
+        try:
+            with yt_dlp.YoutubeDL({'format': 'bestaudio/best', 'writesubtitles': True, 'extractaudio': True, 'outtmpl': f'{tempFp}.%(ext)s'}) as ydlp:
+                yt_dict = ydlp.extract_info(youtube_url, download=False)
+                ydlp.download([youtube_url])
+        except Exception as ex:
+            strEx = str(ex)
+            print('\nYT-DLP FAILED WITH ERROR: \n' + strEx)
+            return f'YT-DLP FAILED WITH ERROR: {strEx}'
 
-    # Return the YT data dictionary
-    return { 'dict': yt_dict, 'transcript': transcript }
+        try:
+            os.system(f"ffmpeg -y -i {tempFp}.webm -c:a flac {tempFp}.flac")
+            print(f"\nFFMPEG PRODUCED {tempFp}.flac")
+        except Exception as ex:
+            strEx = str(ex)
+            print('\nFFMPEG FAILED WITH ERROR: \n' + strEx)
+            return f'FFMPEG FAILED WITH ERROR: {strEx}'
+
+        transcript = transcribe_audio(tempFp + '.flac')
+        print(f"\n TRANSCRIPT: {transcript} \n")
+        return {'dict': yt_dict, 'transcript': transcript}
+
+    except Exception as e:
+        print(f'Error occurred: {e}')
+        return f'Error occurred: {e}'
+
 
 
 # Regex the Youtube ID from a URL
@@ -175,8 +183,15 @@ def add_transcript(request):
                 transcript = dataAndTranscript['transcript']
                 yt_data = dataAndTranscript['dict']
                 title = yt_data.get('title', 'Title Not Found')
-                dateObj = datetime.strptime(yt_data.get('upload_date'), "%Y%m%d")
-                date = dateObj.strftime('%Y-%m-%d')
+
+                # Check if 'upload_date' exists and is not None
+                upload_date = yt_data.get('upload_date')
+                if upload_date:
+                    dateObj = datetime.strptime(upload_date, "%Y%m%d")
+                    date = dateObj.strftime('%Y-%m-%d')
+                else:
+                    date = "2000-09-12"  # Default value for unknown date
+
                 description = yt_data.get('description', 'Description Not Found')
                 # language = yt_data.get('subtitles', {}).get('language')
                 # subtitles = yt_data.get('subtitles', {})   # if user-loaded, can get .vtt
