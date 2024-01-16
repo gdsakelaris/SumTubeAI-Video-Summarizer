@@ -27,7 +27,9 @@ SECRET_KEY = 'django-insecure-dw_ox(j^0tm*$e_6d!1d4*olgt*nvo&ru2h+48kv!1oc6=2fxp
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['3.218.77.172', 'telescode.dev', 'www.telescode.dev']
+
 
 
 # Application definition
