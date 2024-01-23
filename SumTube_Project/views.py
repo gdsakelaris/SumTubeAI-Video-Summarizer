@@ -173,7 +173,7 @@ def add_transcript(request):
                     print("DOWNLOAD AND TRANSCRIBE FAILED WITH ERROR: " + strEx)
                     return render(request, 'error.html', { 'error': f'DOWNLOAD AND TRANSCRIBE FAILED WITH ERROR: {strEx}' })
 
-        # OPENAI API
+        # OPENAI API:
             if proceed:
                 # Take data
                 transcript = dataAndTranscript['transcript']

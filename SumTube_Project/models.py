@@ -2,9 +2,6 @@ from django.db import models
 
 from django.contrib.auth.models import User
 
-# Create your models here.
-
-
 class Video(models.Model):
     ytId = models.TextField(max_length=20, default='null')
     url = models.CharField(max_length=200, default='null')
@@ -23,7 +20,6 @@ class Video(models.Model):
 
     def __str__(self):
         return self.ytId + " | " + self.lang + " | " + self.title
-
 
 class Ticket(models.Model):
     name = models.CharField(max_length=100)
