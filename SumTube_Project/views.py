@@ -92,7 +92,6 @@ def downloadAndTranscribe(youtube_url, fileStem):
         return f'Error occurred: {e}'
 
 
-
 # Regex the Youtube ID from a URL
 def extract_video_id(url):
     # Regular expression pattern to match YouTube video IDs
@@ -108,7 +107,7 @@ def extract_video_id(url):
         return None
 
 
-#    VIEWS             #
+# VIEWS 
 @login_required
 def add_transcript(request):
     if request.method == 'POST':
@@ -125,14 +124,6 @@ def add_transcript(request):
             print(f"\nERROR: INPUTTED URL WAS NOT A VALID URL, NO ID EXTRACTED\n")
             return render(request, 'error.html', { 'error': f'Inputted URL was invalid. Could not recognize Youtube ID in URL: {inputUrl}' })
         
-        # Get Language from POST
-        # inputLangCode = request.POST.get('language')
-        # langString = inputLangCode
-        # try:
-        #     langString = pycountry.languages.get(alpha_2=inputLangCode).name
-        # except AttributeError as ex:
-        #     print("PYCOUNTRY FAILED WITH ERROR: " + str(ex))
-        #     return render(request, 'error.html', { 'error': f'PYCOUNTRY failed with error: {str(ex)}' })
         
         # Check if the URL already exists in the database
         if Video.objects.filter(ytId=ytId).exists():
@@ -146,13 +137,10 @@ def add_transcript(request):
                         'date': vid.published_date,
                         'description': vid.description,
                         'transcript': vid.transcript,
-                        'gptRaw': vid.gptRaw,
-                        # 'lang': vid.lang,
-                        'gptSummary': vid.gptSummary,
-                        # 'gptRec1': vid.gptRec1,
-                        # 'gptRec2': vid.gptRec2,
-                        #'gptRec3': vid.gptRec3,
+                        'gptRaw': vid.gptRaw,                       
+                        'gptSummary': vid.gptSummary,                      
                       }
+
             # Pass the context to the template
             return render(request, 'results.html', context)
         else:
@@ -188,9 +176,7 @@ def add_transcript(request):
                 else:
                     date = "2000-09-12"  # Default value for unknown date
 
-                description = yt_data.get('description', 'Description Not Found')
-                # language = yt_data.get('subtitles', {}).get('language')
-                # subtitles = yt_data.get('subtitles', {})   # if user-loaded, can get .vtt
+                description = yt_data.get('description', 'Description Not Found')            
 
                 # Youtube metadata for prompt
                 video_data = {
@@ -198,35 +184,21 @@ def add_transcript(request):
                     "description": description,
                     "transcript": transcript
                 }
-                # maxTokens = 3000
+
                 maxSentenceCount = 10
                 # print("Tokens Used: " + str(maxTokens))
+
                 # Full Prompt in JSON syntax
                 prompt_data = {
                     "response-task": f"You are to produce a thorough and concise summary of a Youtube video transcript, stored in 'yt-metadata'. You will perform these tasks according to the following format and rules. For this entire request (meaning the combination of the prompt tokens used and the completion tokens), you may use no more than 4096 tokens.",
                     "response-format": '{ "tldr": "<tldr-response>"}',
                     "response-rules": f"You will return your responses as a JSON object structured like 'response-format'. That is, it will be a parseable JSON object where the key is 'tldr'. The value is forbidden from including double quotes since it must be parseable JSON. Again, ensure JSON syntax is followed so that I can parse your response as JSON, so each key and value must be bound by double quotes (per JSON syntax). Value must be bound by a set of double quotes, do not forget this. Parseable JSON is the most important aspect of your response.",
-                    # "response-rules": f"You will return your responses as a JSON object structured like 'response-format'. That is, it will be a parseable JSON object where the keys are 'tldr', 'rec1', and 'rec2' and the values for each are your responses. The values are forbidden from including double quotes since it must be parseable JSON. Again, ensure JSON syntax is followed so that I can parse your response as JSON, so each key and value must be bound by double quotes (per JSON syntax). Values must be bound by a set of double quotes, do not forget this. Parseable JSON is the most important aspect of your response.",
+            
                     "tldr-rules": f"The 'tldr' value should only contain highly specific TL;DR sentence(s). The response is forbidden from containing double quotes. The response must thoroughly summarize the video's transcript.",
-                    # "tldr-rules": f"The value for 'tldr' should not contain any recommendation information, as that should only appear in the 'recX' values. The 'tldr' value should only contain the TL;DR sentence(s). The response is forbidden from containing double quotes.",
-                    # "recommendation-rules": f"The values for the 'rec1' and 'rec2' keys should each include a unique YouTube channel and a brief synopsis in {langString} of that recommended channel. The recommended channels should be two different channels. The format for this response can be <channel-name>: <channel-description>.",
+                    
                     "yt-metadata": video_data
                 }
-                # prompt_data = {
-                #     "response-task": f"You are to produce a TL;DR from a Youtube Transcript, stored in 'yt-metadata'. The TL;DR must be in {langString} and it is restricted to using {str(maxSentenceCount)} sentence(s) at maximum.. Furthermore, you will also recommend 2 unique Youtube Channels related to this video. You will perform these tasks according to the following format and rules.",
-                #     "response-format": '{ "tldr": "<tldr-response>", "rec1": "<recommendation-response-1>", "rec2": "<recommendation-response-2>" }',
-                #     "response-rules": f"You will return your responses as a JSON object structured like 'response-format'. That is, it will be a parseable JSON object where the keys are 'tldr', 'rec1', and 'rec2' and the values for each are your responses. The values are forbidden from including double quotes since it must be parseable JSON. Again, ensure JSON syntax is followed so that I can parse your response as JSON, so each key and value must be bound by double quotes (per JSON syntax). Values must be bound by a set of double quotes, do not forget this. Parseable JSON is the most important aspect of your response.",
-                #     "tldr-rules": f"The value for 'tldr' should not contain any recommendation information, as that should only appear in the 'recX' values. The 'tldr' value should only contain the TL;DR sentence(s). The response is forbidden from containing double quotes.",
-                #     "recommendation-rules": f"The values for the 'rec1' and 'rec2' keys should each include a unique YouTube channel and a brief synopsis in {langString} of that recommended channel. The recommended channels should be two different channels. The format for this response can be <channel-name>: <channel-description>.",
-                #     "yt-metadata": video_data
-                # }
-                # and it is restricted to using {str(maxSentenceCount)} sentence(s) at maximum.
-                # It can only use {str(maxSentenceCount)} sentence(s) at maximum."
-                # Convert prompt_data to JSON string
-                # Edits
-                # prompt_approx_token_count = 1000 
-                # max_completion_tokens = 4000 - prompt_approx_token_count 
-                #
+                
                 prompt = json.dumps(prompt_data)
 
                 # Calculate the approximate token count for the prompt (assuming 1 word = 1 token)
@@ -242,12 +214,8 @@ def add_transcript(request):
                         model="gpt-3.5-turbo-instruct",
                         prompt=prompt,
                         max_tokens=max_completion_tokens,
-                        # max_tokens=max_completion_tokens,
-                        # max_tokens=2000,
-                        # max_tokens=maxTokens,
                         temperature=0.7,
                         top_p=1,
-                        # frequency_penalty=0.0,
                         # presence_penalty=1,
                     )
                 except Exception as ex:
@@ -258,19 +226,12 @@ def add_transcript(request):
                 # Get the response
                 gptRaw = response.choices[0].text
                 print(gptRaw)
-                # print(inputLangCode)
-                # print(langString)
-                # Parse the JSON
                 gptSummary = ''
-                # gptRec1 = ''
-                # gptRec2 = ''
-                #gptRec3 = ''
+
                 try:
                     gptJson = json.loads(gptRaw)
                     gptSummary = gptJson['tldr']
-                    # gptRec1 = gptJson['rec1']
-                    # gptRec2 = gptJson['rec2']
-                    #gptRec3 = gptJson['rec3']
+
                 except JSONDecodeError as e:
                     print(e)
                 
@@ -283,11 +244,7 @@ def add_transcript(request):
                     published_date=date, 
                     transcript=transcript,
                     gptRaw=gptRaw, 
-                    # lang=langString, 
                     gptSummary=gptSummary, 
-                    # gptRec1=gptRec1,
-                    # gptRec2=gptRec2,
-                    #gptRec3=gptRec3,
                 )
                 vid = Video.objects.get(ytId=ytId)
 
@@ -300,12 +257,9 @@ def add_transcript(request):
                     'description': vid.description,
                     'transcript': vid.transcript,
                     'gptRaw': vid.gptRaw,
-                    # 'lang': vid.lang,
                     'gptSummary': vid.gptSummary,
-                    # 'gptRec1': vid.gptRec1,
-                    # 'gptRec2': vid.gptRec2,
-                    #'gptRec3': vid.gptRec3,
                 }
+                
                 return render(request, 'results.html', context)
             else:
                 return render(request, 'results.html')
